@@ -1,0 +1,25 @@
+{
+  "title": "UK Public Tenders Feed",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "noticeTypes": { "title": "Notice types", "type": "array", "editor": "select", "items": { "type": "string", "enum": ["opportunity", "planning", "award", "update"], "enumTitles": ["Opportunities (tender notices you can bid on)", "Pipeline and planning (pipeline, preliminary market engagement, planned procurement)", "Awards (contract award, contract details, transparency notices: who won)", "Updates (changes, cancellations, terminations, performance)"] }, "description": "Leave empty for opportunities only.", "prefill": ["opportunity"] },
+    "cpvPrefixes": { "title": "CPV codes (or their start)", "type": "array", "editor": "stringList", "description": "2 to 8 digits. 72 = IT services, 48 = software, 45 = construction works, 79 = business services, 85 = health and social work, 90 = waste and environmental. A notice matches if any of its CPV codes starts with one of these. Leave empty for all.", "prefill": ["72", "48"] },
+    "keywords": { "title": "Keywords (any)", "type": "array", "editor": "stringList", "description": "Only notices whose title or description contains at least one of these (case-insensitive), e.g. cyber, data platform, CCTV." },
+    "excludeKeywords": { "title": "Exclude keywords", "type": "array", "editor": "stringList", "description": "Drop notices whose title or description contains any of these." },
+    "regions": { "title": "Regions (ITL / NUTS codes)", "type": "array", "editor": "stringList", "description": "Delivery or buyer region codes or their start: UKC North East, UKD North West, UKE Yorkshire and the Humber, UKF East Midlands, UKG West Midlands, UKH East of England, UKI London, UKJ South East, UKK South West, UKL Wales, UKM Scotland, UKN Northern Ireland. Contracts Finder region names are mapped to these codes. Nationwide (UK) notices always match." },
+    "includeUnknownRegion": { "title": "Keep notices without any region", "type": "boolean", "default": true, "description": "Many Contracts Finder notices state no region. Turn off to drop them when a region filter is set." },
+    "minValueGbp": { "title": "Minimum value (GBP)", "type": "integer", "minimum": 0, "description": "Estimated contract value excluding VAT (or including VAT if that is all the notice gives; for awards, the awarded value)." },
+    "maxValueGbp": { "title": "Maximum value (GBP)", "type": "integer", "minimum": 0, "description": "Leave empty for no maximum." },
+    "includeUnknownValue": { "title": "Keep notices without a value", "type": "boolean", "default": true, "description": "About a third of notices publish no value. Turn off to drop them when a value filter is set." },
+    "openOnly": { "title": "Open opportunities only", "type": "boolean", "default": true, "description": "Drop tender notices whose submission deadline has passed or that are cancelled. Other notice types are not affected." },
+    "smeSuitableOnly": { "title": "Suitable for SMEs only", "type": "boolean", "default": false, "description": "Only notices (or at least one lot) the buyer marked as suitable for small and medium-sized enterprises." },
+    "buyerNameContains": { "title": "Buyer name contains", "type": "array", "editor": "stringList", "description": "e.g. NHS, Council, Ministry of Defence." },
+    "sources": { "title": "Sources", "type": "array", "editor": "select", "items": { "type": "string", "enum": ["find-a-tender", "contracts-finder"], "enumTitles": ["Find a Tender (all Procurement Act 2023 notices and above-threshold notices)", "Contracts Finder (lower-value and older-regime notices in England)"] }, "description": "Leave empty for both. A notice published on both is output once (the Find a Tender copy)." },
+    "days": { "title": "Days to look back", "type": "integer", "minimum": 1, "maximum": 30, "default": 3, "description": "Window of publication dates read on every run. With \"only new\" on, use more days than your schedule interval (3 for a daily schedule, 10 for weekly) so nothing falls between runs." },
+    "onlyNew": { "title": "Only notices not output before (for schedules)", "type": "boolean", "default": true, "description": "Remembered per filter set in a named key-value store. Turn off to get the whole window every time." },
+    "maxItems": { "title": "Max notices per run", "type": "integer", "minimum": 1, "maximum": 10000, "default": 200, "description": "You are charged per notice stored, so this caps the cost of a run. About 350 Find a Tender and 110 Contracts Finder notices of all types are published per working day. Notices cut by the limit stay new for the next run." },
+    "descriptionMaxChars": { "title": "Description length (characters)", "type": "integer", "minimum": 0, "maximum": 20000, "default": 1000, "description": "Descriptions are shortened to this length (keywords are matched on the full text). 0 leaves the description out." },
+    "stateStoreName": { "title": "State store name (advanced)", "type": "string", "editor": "textfield", "description": "Leave empty to use the default." }
+  }
+}

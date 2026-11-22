@@ -1,0 +1,40 @@
+# Unit tests and generated-file checks. No Apify token is used and Apify is never contacted.
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      APIFY_TOKEN: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Node recipes
+        working-directory: node
+        run: npm ci --no-audit --no-fund && npm test
+      - name: Python recipes (apify-client is mocked, not installed)
+        working-directory: python
+        run: python -m unittest discover -s tests -t . -v
+      - name: n8n workflow (build check, validation, tests)
+        working-directory: n8n/uk-tenders-daily-digest
+        run: node build.mjs --check && node validate.mjs && npm test
+      - name: Demo pages are up to date
+        run: node scripts/build-demos.mjs --check
+      - name: JSON files parse
+        run: |
+          for f in catalog.json presets/*.json samples/*.json schemas/*.json n8n/*/workflow.json; do
+            python -m json.tool "$f" > /dev/null || { echo "bad JSON in $f"; exit 1; }
+          done

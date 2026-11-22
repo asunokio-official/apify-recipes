@@ -1,0 +1,24 @@
+{
+  "id": "uk-it-tenders-london-se-daily",
+  "actor": "uk-public-tenders-feed",
+  "title": "UK IT tenders in London and the South East (daily)",
+  "who": "Regional IT suppliers and agencies.",
+  "schedule": "daily (days 3)",
+  "input": {
+    "noticeTypes": [
+      "opportunity"
+    ],
+    "cpvPrefixes": [
+      "72",
+      "48"
+    ],
+    "regions": [
+      "UKI",
+      "UKJ"
+    ],
+    "minValueGbp": 100000,
+    "days": 3,
+    "maxItems": 200
+  },
+  "notes": "A niche like this typically returns 0 to 20 new notices a day."
+}

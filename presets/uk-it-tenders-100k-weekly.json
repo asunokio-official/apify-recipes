@@ -1,0 +1,23 @@
+{
+  "id": "uk-it-tenders-100k-weekly",
+  "actor": "uk-public-tenders-feed",
+  "title": "UK IT and software tenders worth GBP 100k or more (weekly)",
+  "who": "IT suppliers, software vendors and bid writers looking for open opportunities.",
+  "schedule": "weekly (days 10 so nothing falls between runs)",
+  "input": {
+    "noticeTypes": [
+      "opportunity"
+    ],
+    "cpvPrefixes": [
+      "72",
+      "48"
+    ],
+    "minValueGbp": 100000,
+    "includeUnknownValue": false,
+    "openOnly": true,
+    "days": 10,
+    "onlyNew": true,
+    "maxItems": 300
+  },
+  "notes": "CPV 72 = IT services, 48 = software packages. Notices without a published value are left out (includeUnknownValue false)."
+}

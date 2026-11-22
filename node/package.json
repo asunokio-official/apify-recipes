@@ -1,0 +1,17 @@
+{
+  "name": "asunoki-apify-recipes",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Runnable recipes for ASUNOKI's Apify Actors: presets, cost estimate, CSV output, Slack digest.",
+  "license": "MIT",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "bin": { "asunoki-recipes": "src/cli.js" },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\"",
+    "list": "node src/cli.js list"
+  },
+  "dependencies": {
+    "apify-client": "^2.26.0"
+  }
+}

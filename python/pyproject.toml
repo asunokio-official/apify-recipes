@@ -1,0 +1,17 @@
+[project]
+name = "asunoki-apify-recipes"
+version = "0.1.0"
+description = "Runnable recipes for ASUNOKI's Apify Actors: presets, cost estimate, CSV output."
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = ["apify-client>=2.0"]
+
+[project.scripts]
+asunoki-recipes = "asunoki_recipes.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["asunoki_recipes"]

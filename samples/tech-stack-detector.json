@@ -1,0 +1,1748 @@
+{
+  "note": "Real results for 10 public websites (Actor build 0.1.22, HTTP scan with ecommerceSignals, 11 Nov 2026), the same run as the public sample report at https://asunoki.jp/ec-lab/reports/sample-store-list-1111/. Reshaped to the Actor's dataset row format; flat category columns are derived from technologies[]. Sites change, so a run today can differ.",
+  "rows": [
+    {
+      "url": "https://woocommerce.com/",
+      "finalUrl": "https://woocommerce.com/",
+      "statusCode": 200,
+      "scanStatus": "ok",
+      "scanMode": "http",
+      "browserUsed": false,
+      "cms": "WordPress",
+      "ecommercePlatform": "WooCommerce",
+      "cdn": [],
+      "analytics": [],
+      "tagManagers": [],
+      "paymentProviders": [],
+      "marketingTools": [],
+      "chatSupport": [],
+      "emailInfrastructure": [],
+      "emailServices": [],
+      "dnsProvider": null,
+      "webServer": "nginx",
+      "consentManagement": [],
+      "video": [
+        "Wistia"
+      ],
+      "fonts": [],
+      "javascriptLibraries": [
+        "jQuery"
+      ],
+      "hosting": [],
+      "advertising": [],
+      "technologies": [
+        {
+          "name": "WooCommerce",
+          "category": "Ecommerce",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "meta",
+              "key": "generator",
+              "value": "WooCommerce 11.4.0-dev.20261110",
+              "strength": "strong"
+            },
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://woocommerce.com/wp-content/plugins/woocommerce/assets/js/js-cookie/js.cookie.min.js?m=1790319824g",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "WordPress",
+          "category": "CMS",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "meta",
+              "key": "generator",
+              "value": "WordPress 7.1.4",
+              "strength": "strong"
+            },
+            {
+              "method": "link",
+              "key": "link[rel]",
+              "value": "https://api.w.org/",
+              "strength": "strong"
+            },
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://woocommerce.com/wp-content/themes/woo/fonts/font-awesome/css/core.min.css?v=7.2",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Wistia",
+          "category": "Video",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://embed-ssl.wistia.com/deliveries/494d0b0f9be4dab33da89c9922fbc9cb.jpg?image_crop_resized=960x540",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "nginx",
+          "category": "Web server",
+          "confidence": 95,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "header",
+              "key": "server",
+              "value": "nginx",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "jQuery",
+          "category": "JavaScript library",
+          "confidence": 85,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "script",
+              "key": null,
+              "value": "https://woocommerce.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1",
+              "strength": "strong"
+            }
+          ]
+        }
+      ],
+      "technologyCount": 5,
+      "ecommerce": {
+        "platform": {
+          "value": "WooCommerce",
+          "status": "confirmed"
+        }
+      },
+      "scannedAt": "2026-11-11T01:01:49.006Z"
+    },
+    {
+      "url": "https://kyliecosmetics.com/",
+      "finalUrl": "https://kyliecosmetics.com/",
+      "statusCode": 200,
+      "scanStatus": "ok",
+      "scanMode": "http",
+      "browserUsed": false,
+      "cms": null,
+      "ecommercePlatform": "Shopify",
+      "cdn": [
+        "Cloudflare",
+        "cdnjs",
+        "jsDelivr"
+      ],
+      "analytics": [],
+      "tagManagers": [
+        "Google Tag Manager"
+      ],
+      "paymentProviders": [],
+      "marketingTools": [
+        "Klaviyo"
+      ],
+      "chatSupport": [],
+      "emailInfrastructure": [
+        "Google Workspace (Gmail)"
+      ],
+      "emailServices": [],
+      "dnsProvider": null,
+      "webServer": null,
+      "consentManagement": [
+        "OneTrust"
+      ],
+      "video": [],
+      "fonts": [],
+      "javascriptLibraries": [],
+      "hosting": [],
+      "advertising": [],
+      "technologies": [
+        {
+          "name": "Cloudflare",
+          "category": "CDN",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "header",
+              "key": "cf-ray",
+              "value": "a5895e2d5fe9e5b2-IAD",
+              "strength": "strong"
+            },
+            {
+              "method": "header",
+              "key": "server",
+              "value": "cloudflare",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Shopify",
+          "category": "Ecommerce",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "cookie",
+              "key": "_shopify_essential",
+              "value": "(cookie name)",
+              "strength": "strong"
+            },
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.shopify.com/shopifycloud/shop-js/modules/v2/loader.init-shop-cart-sync.en.esm.js",
+              "strength": "strong"
+            },
+            {
+              "method": "html",
+              "key": null,
+              "value": "Shopify.theme =",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Google Tag Manager",
+          "category": "Tag manager",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://www.googletagmanager.com/gtm.js?id=",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Klaviyo",
+          "category": "Marketing automation",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://static.klaviyo.com/onsite/js/XqQ9Vp/klaviyo.js?company_id=XqQ9Vp",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "OneTrust",
+          "category": "Consent management",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.cookielaw.org/scripttemplates/otSDKStub.js",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Google Workspace (Gmail)",
+          "category": "Email infrastructure",
+          "confidence": 95,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "dns_mx",
+              "key": "dns_mx",
+              "value": "aspmx.l.google.com",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "cdnjs",
+          "category": "CDN",
+          "confidence": 60,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js",
+              "strength": "weak"
+            }
+          ]
+        },
+        {
+          "name": "jsDelivr",
+          "category": "CDN",
+          "confidence": 55,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.jsdelivr.net/",
+              "strength": "weak"
+            }
+          ]
+        }
+      ],
+      "technologyCount": 8,
+      "ecommerce": {
+        "platform": {
+          "value": "Shopify",
+          "status": "confirmed"
+        },
+        "shopifyTheme": {
+          "name": "KYLIE",
+          "status": "confirmed"
+        },
+        "currency": {
+          "value": "USD",
+          "status": "confirmed"
+        },
+        "apps": [
+          {
+            "name": "Klaviyo",
+            "status": "confirmed",
+            "evidence": "script/asset https://static.klaviyo.com/onsite/js/…"
+          },
+          {
+            "name": "Yotpo",
+            "status": "confirmed",
+            "evidence": "script/asset https://cdn-widgetsrepository.yotpo.com/v1/loader/…"
+          }
+        ]
+      },
+      "scannedAt": "2026-11-11T01:01:49.187Z"
+    },
+    {
+      "url": "https://colourpop.com/",
+      "finalUrl": "https://colourpop.com/",
+      "statusCode": 200,
+      "scanStatus": "ok",
+      "scanMode": "http",
+      "browserUsed": false,
+      "cms": null,
+      "ecommercePlatform": "Shopify",
+      "cdn": [
+        "Cloudflare"
+      ],
+      "analytics": [
+        "Microsoft Clarity"
+      ],
+      "tagManagers": [
+        "Google Tag Manager"
+      ],
+      "paymentProviders": [],
+      "marketingTools": [
+        "Klaviyo"
+      ],
+      "chatSupport": [
+        "Gorgias"
+      ],
+      "emailInfrastructure": [],
+      "emailServices": [
+        "SendGrid"
+      ],
+      "dnsProvider": null,
+      "webServer": null,
+      "consentManagement": [
+        "OneTrust"
+      ],
+      "video": [],
+      "fonts": [],
+      "javascriptLibraries": [],
+      "hosting": [],
+      "advertising": [],
+      "technologies": [
+        {
+          "name": "Cloudflare",
+          "category": "CDN",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "header",
+              "key": "cf-ray",
+              "value": "a5895e2d6d9d73eb-IAD",
+              "strength": "strong"
+            },
+            {
+              "method": "header",
+              "key": "server",
+              "value": "cloudflare",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Shopify",
+          "category": "Ecommerce",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "cookie",
+              "key": "_shopify_essential",
+              "value": "(cookie name)",
+              "strength": "strong"
+            },
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.shopify.com/shopifycloud/shop-js/modules/v2/loader.init-shop-cart-sync.en.esm.js",
+              "strength": "strong"
+            },
+            {
+              "method": "html",
+              "key": null,
+              "value": "Shopify.theme =",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Google Tag Manager",
+          "category": "Tag manager",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://www.googletagmanager.com/gtm.js?id=",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Gorgias",
+          "category": "Customer support / chat",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://config.gorgias.chat/bundle-loader/shopify/colourpop-prd.myshopify.com",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Klaviyo",
+          "category": "Marketing automation",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://static.klaviyo.com/onsite/js/TmEje7/klaviyo.js?company_id=TmEje7",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "OneTrust",
+          "category": "Consent management",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.cookielaw.org/consent/019074af-b6fa-794f-b5d2-dc43921ade93/OtAutoBlock.js",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Microsoft Clarity",
+          "category": "Analytics",
+          "confidence": 95,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://www.clarity.ms/tag/",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "SendGrid",
+          "category": "Email service",
+          "confidence": 60,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "dns_txt",
+              "key": "dns_txt",
+              "value": "include:sendgrid.net ~all",
+              "strength": "weak"
+            }
+          ]
+        }
+      ],
+      "technologyCount": 8,
+      "ecommerce": {
+        "platform": {
+          "value": "Shopify",
+          "status": "confirmed"
+        },
+        "shopifyTheme": {
+          "name": "Colourpop",
+          "status": "confirmed"
+        },
+        "currency": {
+          "value": "USD",
+          "status": "confirmed"
+        },
+        "apps": [
+          {
+            "name": "Klaviyo",
+            "status": "confirmed",
+            "evidence": "script/asset https://static.klaviyo.com/onsite/js/…"
+          },
+          {
+            "name": "Gorgias",
+            "status": "confirmed",
+            "evidence": "script/asset https://config.gorgias.chat/bundle-loader/shopify/…"
+          },
+          {
+            "name": "Yotpo",
+            "status": "confirmed",
+            "evidence": "script/asset https://cdn-widgetsrepository.yotpo.com/v1/loader/…"
+          },
+          {
+            "name": "Okendo",
+            "status": "confirmed",
+            "evidence": "script/asset https://d3hw6dc1ow8pp2.cloudfront.net/referrals/js/…"
+          }
+        ]
+      },
+      "scannedAt": "2026-11-11T01:01:49.171Z"
+    },
+    {
+      "url": "https://magicspoon.com/",
+      "finalUrl": "https://magicspoon.com/",
+      "statusCode": 200,
+      "scanStatus": "ok",
+      "scanMode": "http",
+      "browserUsed": false,
+      "cms": null,
+      "ecommercePlatform": "Shopify",
+      "cdn": [
+        "Cloudflare",
+        "jsDelivr",
+        "unpkg"
+      ],
+      "analytics": [],
+      "tagManagers": [],
+      "paymentProviders": [],
+      "marketingTools": [
+        "Klaviyo"
+      ],
+      "chatSupport": [],
+      "emailInfrastructure": [],
+      "emailServices": [
+        "SendGrid"
+      ],
+      "dnsProvider": null,
+      "webServer": null,
+      "consentManagement": [],
+      "video": [],
+      "fonts": [
+        "Google Fonts"
+      ],
+      "javascriptLibraries": [
+        "jQuery"
+      ],
+      "hosting": [],
+      "advertising": [],
+      "technologies": [
+        {
+          "name": "Cloudflare",
+          "category": "CDN",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "header",
+              "key": "cf-ray",
+              "value": "a5895e2d7ab32902-IAD",
+              "strength": "strong"
+            },
+            {
+              "method": "header",
+              "key": "server",
+              "value": "cloudflare",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "jQuery",
+          "category": "JavaScript library",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "script",
+              "key": null,
+              "value": "https://code.jquery.com/jquery-3.6.0.min.js",
+              "strength": "strong"
+            },
+            {
+              "method": "script",
+              "key": null,
+              "value": "https://code.jquery.com/jquery-3.6.0.min.js",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Shopify",
+          "category": "Ecommerce",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "cookie",
+              "key": "_shopify_essential",
+              "value": "(cookie name)",
+              "strength": "strong"
+            },
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.shopify.com/shopifycloud/shop-js/modules/v2/loader.init-shop-cart-sync.en.esm.js",
+              "strength": "strong"
+            },
+            {
+              "method": "html",
+              "key": null,
+              "value": "Shopify.theme =",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Klaviyo",
+          "category": "Marketing automation",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://static.klaviyo.com/onsite/js/HMWFR8/klaviyo.js?company_id=HMWFR8",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Google Fonts",
+          "category": "Fonts",
+          "confidence": 95,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,300;0,400;0,500;0,700;0,900;1,400&family=Saira+Conden",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "jsDelivr",
+          "category": "CDN",
+          "confidence": 90,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "unpkg",
+          "category": "CDN",
+          "confidence": 90,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://unpkg.com/aos@2.3.1/dist/aos.css",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "SendGrid",
+          "category": "Email service",
+          "confidence": 60,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "dns_txt",
+              "key": "dns_txt",
+              "value": "v=spf1 include:_spf.google.com include:spf.gorgias.com include:sendgrid.net ~all",
+              "strength": "weak"
+            }
+          ]
+        }
+      ],
+      "technologyCount": 8,
+      "ecommerce": {
+        "platform": {
+          "value": "Shopify",
+          "status": "confirmed"
+        },
+        "shopifyTheme": {
+          "name": "magicspoon-shopify/MAIN",
+          "status": "confirmed"
+        },
+        "currency": {
+          "value": "USD",
+          "status": "confirmed"
+        },
+        "apps": [
+          {
+            "name": "Klaviyo",
+            "status": "confirmed",
+            "evidence": "script/asset https://static.klaviyo.com/onsite/js/…"
+          },
+          {
+            "name": "Okendo",
+            "status": "confirmed",
+            "evidence": "script/asset https://cdn-static.okendo.io/reviews-widget-plus/js/…"
+          }
+        ]
+      },
+      "scannedAt": "2026-11-11T01:01:49.298Z"
+    },
+    {
+      "url": "https://ghostlifestyle.com/",
+      "finalUrl": "https://www.ghostlifestyle.com/",
+      "statusCode": 200,
+      "scanStatus": "ok",
+      "scanMode": "http",
+      "browserUsed": false,
+      "cms": null,
+      "ecommercePlatform": "Shopify",
+      "cdn": [
+        "Cloudflare",
+        "jsDelivr"
+      ],
+      "analytics": [],
+      "tagManagers": [],
+      "paymentProviders": [],
+      "marketingTools": [
+        "Klaviyo"
+      ],
+      "chatSupport": [
+        "Gorgias"
+      ],
+      "emailInfrastructure": [],
+      "emailServices": [
+        "SendGrid"
+      ],
+      "dnsProvider": null,
+      "webServer": null,
+      "consentManagement": [],
+      "video": [],
+      "fonts": [],
+      "javascriptLibraries": [],
+      "hosting": [],
+      "advertising": [],
+      "technologies": [
+        {
+          "name": "Cloudflare",
+          "category": "CDN",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "header",
+              "key": "cf-ray",
+              "value": "a5895e2ebad31f57-IAD",
+              "strength": "strong"
+            },
+            {
+              "method": "header",
+              "key": "server",
+              "value": "cloudflare",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Shopify",
+          "category": "Ecommerce",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "cookie",
+              "key": "_shopify_essential",
+              "value": "(cookie name)",
+              "strength": "strong"
+            },
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.shopify.com/shopifycloud/shop-js/modules/v2/loader.init-shop-cart-sync.en.esm.js",
+              "strength": "strong"
+            },
+            {
+              "method": "html",
+              "key": null,
+              "value": "Shopify.theme =",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Gorgias",
+          "category": "Customer support / chat",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://config.gorgias.chat/bundle-loader/shopify/ghost-lifestyle.myshopify.com",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Klaviyo",
+          "category": "Marketing automation",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://static.klaviyo.com/onsite/js/XfiE2Z/klaviyo.js?company_id=XfiE2Z",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "jsDelivr",
+          "category": "CDN",
+          "confidence": 90,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "SendGrid",
+          "category": "Email service",
+          "confidence": 60,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "dns_txt",
+              "key": "dns_txt",
+              "value": "v=spf1 include:_spf.google.com include:_spf.mailgun.org include:sendgrid.net include:spf.mandrillapp.com include:spf-002",
+              "strength": "weak"
+            }
+          ]
+        }
+      ],
+      "technologyCount": 6,
+      "ecommerce": {
+        "platform": {
+          "value": "Shopify",
+          "status": "confirmed"
+        },
+        "shopifyTheme": {
+          "name": "Ghost x Sparky Redesign",
+          "status": "confirmed"
+        },
+        "currency": {
+          "value": "USD",
+          "status": "confirmed"
+        },
+        "apps": [
+          {
+            "name": "Klaviyo",
+            "status": "confirmed",
+            "evidence": "script/asset https://static.klaviyo.com/onsite/js/…"
+          },
+          {
+            "name": "Gorgias",
+            "status": "confirmed",
+            "evidence": "script/asset https://config.gorgias.chat/bundle-loader/shopify/…"
+          }
+        ]
+      },
+      "scannedAt": "2026-11-11T01:01:49.340Z"
+    },
+    {
+      "url": "https://tentree.com/",
+      "finalUrl": "https://www.tentree.com/",
+      "statusCode": 200,
+      "scanStatus": "ok",
+      "scanMode": "http",
+      "browserUsed": false,
+      "cms": null,
+      "ecommercePlatform": "Shopify",
+      "cdn": [
+        "Cloudflare",
+        "jsDelivr"
+      ],
+      "analytics": [],
+      "tagManagers": [
+        "Google Tag Manager"
+      ],
+      "paymentProviders": [
+        "Klarna"
+      ],
+      "marketingTools": [
+        "Klaviyo"
+      ],
+      "chatSupport": [],
+      "emailInfrastructure": [
+        "Google Workspace (Gmail)",
+        "Microsoft 365 (Exchange Online)"
+      ],
+      "emailServices": [
+        "Mailgun"
+      ],
+      "dnsProvider": "Cloudflare DNS",
+      "webServer": null,
+      "consentManagement": [],
+      "video": [],
+      "fonts": [],
+      "javascriptLibraries": [],
+      "hosting": [],
+      "advertising": [],
+      "technologies": [
+        {
+          "name": "Cloudflare",
+          "category": "CDN",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "header",
+              "key": "cf-ray",
+              "value": "a5895e2e79b038ab-IAD",
+              "strength": "strong"
+            },
+            {
+              "method": "header",
+              "key": "server",
+              "value": "cloudflare",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Shopify",
+          "category": "Ecommerce",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "cookie",
+              "key": "_shopify_essential",
+              "value": "(cookie name)",
+              "strength": "strong"
+            },
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.shopify.com/shopifycloud/shop-js/modules/v2/loader.init-shop-cart-sync.en.esm.js",
+              "strength": "strong"
+            },
+            {
+              "method": "html",
+              "key": null,
+              "value": "Shopify.theme =",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Google Tag Manager",
+          "category": "Tag manager",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://www.googletagmanager.com/gtm.js?id=",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Klarna",
+          "category": "Payment",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://js.klarna.com/web-sdk/v1/klarna.js",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Klaviyo",
+          "category": "Marketing automation",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://static.klaviyo.com/onsite/js/Mgmu3W/klaviyo.js?company_id=Mgmu3W",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Cloudflare DNS",
+          "category": "DNS provider",
+          "confidence": 95,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "dns_ns",
+              "key": "dns_ns",
+              "value": "sam.ns.cloudflare.com",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Google Workspace (Gmail)",
+          "category": "Email infrastructure",
+          "confidence": 95,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "dns_mx",
+              "key": "dns_mx",
+              "value": "aspmx.l.google.com",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "jsDelivr",
+          "category": "CDN",
+          "confidence": 60,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide-core.min.css",
+              "strength": "weak"
+            }
+          ]
+        },
+        {
+          "name": "Mailgun",
+          "category": "Email service",
+          "confidence": 60,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "dns_txt",
+              "key": "dns_txt",
+              "value": "v=spf1 ip4:216.25.32.211 ip4:68.168.119.166 ip4:99.199.65.145 ip4:75.126.218.34 ip4:52.86.119.6 ip4:149.72.250.207 ip4:1",
+              "strength": "weak"
+            }
+          ]
+        },
+        {
+          "name": "Microsoft 365 (Exchange Online)",
+          "category": "Email infrastructure",
+          "confidence": 60,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "dns_txt",
+              "key": "dns_txt",
+              "value": "v=spf1 ip4:216.25.32.211 ip4:68.168.119.166 ip4:99.199.65.145 ip4:75.126.218.34 ip4:52.86.119.6 ip4:149.72.250.207 ip4:1",
+              "strength": "weak"
+            }
+          ]
+        }
+      ],
+      "technologyCount": 10,
+      "ecommerce": {
+        "platform": {
+          "value": "Shopify",
+          "status": "confirmed"
+        },
+        "shopifyTheme": {
+          "name": "Shopify Theme Lab",
+          "status": "confirmed"
+        },
+        "currency": {
+          "value": "USD",
+          "status": "confirmed"
+        },
+        "apps": [
+          {
+            "name": "Klaviyo",
+            "status": "confirmed",
+            "evidence": "script/asset https://static.klaviyo.com/onsite/js/…"
+          },
+          {
+            "name": "Okendo",
+            "status": "confirmed",
+            "evidence": "script/asset https://cdn-static.okendo.io/reviews-widget-plus/js/…"
+          }
+        ]
+      },
+      "scannedAt": "2026-11-11T01:01:49.543Z"
+    },
+    {
+      "url": "https://beardbrand.com/",
+      "finalUrl": "https://www.beardbrand.com/",
+      "statusCode": 200,
+      "scanStatus": "ok",
+      "scanMode": "http",
+      "browserUsed": false,
+      "cms": null,
+      "ecommercePlatform": "Shopify",
+      "cdn": [
+        "Cloudflare"
+      ],
+      "analytics": [],
+      "tagManagers": [],
+      "paymentProviders": [],
+      "marketingTools": [
+        "Klaviyo"
+      ],
+      "chatSupport": [],
+      "emailInfrastructure": [
+        "Google Workspace (Gmail)"
+      ],
+      "emailServices": [
+        "SendGrid"
+      ],
+      "dnsProvider": "Cloudflare DNS",
+      "webServer": null,
+      "consentManagement": [],
+      "video": [],
+      "fonts": [],
+      "javascriptLibraries": [
+        "jQuery"
+      ],
+      "hosting": [],
+      "advertising": [],
+      "technologies": [
+        {
+          "name": "Cloudflare",
+          "category": "CDN",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "header",
+              "key": "cf-ray",
+              "value": "a5895e2e7f4e15e8-IAD",
+              "strength": "strong"
+            },
+            {
+              "method": "header",
+              "key": "server",
+              "value": "cloudflare",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Shopify",
+          "category": "Ecommerce",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "cookie",
+              "key": "_shopify_essential",
+              "value": "(cookie name)",
+              "strength": "strong"
+            },
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.shopify.com/s/files/1/0209/0478/files/HW_Pano_Bold.woff?v=1689187304",
+              "strength": "strong"
+            },
+            {
+              "method": "html",
+              "key": null,
+              "value": "Shopify.theme =",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Klaviyo",
+          "category": "Marketing automation",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://static.klaviyo.com/onsite/js/hFArAj/klaviyo.js?company_id=hFArAj",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Cloudflare DNS",
+          "category": "DNS provider",
+          "confidence": 95,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "dns_ns",
+              "key": "dns_ns",
+              "value": "eva.ns.cloudflare.com",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Google Workspace (Gmail)",
+          "category": "Email infrastructure",
+          "confidence": 95,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "dns_mx",
+              "key": "dns_mx",
+              "value": "aspmx.l.google.com",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "jQuery",
+          "category": "JavaScript library",
+          "confidence": 85,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "script",
+              "key": null,
+              "value": "https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "SendGrid",
+          "category": "Email service",
+          "confidence": 60,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "dns_txt",
+              "key": "dns_txt",
+              "value": "v=spf1 include:_spf.google.com include:sendgrid.net ~all",
+              "strength": "weak"
+            }
+          ]
+        }
+      ],
+      "technologyCount": 7,
+      "ecommerce": {
+        "platform": {
+          "value": "Shopify",
+          "status": "confirmed"
+        },
+        "shopifyTheme": {
+          "name": "Split",
+          "status": "confirmed"
+        },
+        "currency": {
+          "value": "USD",
+          "status": "confirmed"
+        },
+        "apps": [
+          {
+            "name": "Klaviyo",
+            "status": "confirmed",
+            "evidence": "script/asset https://static.klaviyo.com/onsite/js/…"
+          },
+          {
+            "name": "Recharge",
+            "status": "confirmed",
+            "evidence": "script/asset https://static.rechargecdn.com/assets/storefront-experiences/…"
+          }
+        ]
+      },
+      "scannedAt": "2026-11-11T01:01:49.578Z"
+    },
+    {
+      "url": "https://hauslabs.com/",
+      "finalUrl": "https://www.hauslabs.com/",
+      "statusCode": 200,
+      "scanStatus": "ok",
+      "scanMode": "http",
+      "browserUsed": false,
+      "cms": null,
+      "ecommercePlatform": "Shopify",
+      "cdn": [
+        "Cloudflare"
+      ],
+      "analytics": [],
+      "tagManagers": [],
+      "paymentProviders": [],
+      "marketingTools": [
+        "Klaviyo"
+      ],
+      "chatSupport": [],
+      "emailInfrastructure": [
+        "Google Workspace (Gmail)"
+      ],
+      "emailServices": [],
+      "dnsProvider": null,
+      "webServer": null,
+      "consentManagement": [],
+      "video": [],
+      "fonts": [],
+      "javascriptLibraries": [],
+      "hosting": [],
+      "advertising": [],
+      "technologies": [
+        {
+          "name": "Cloudflare",
+          "category": "CDN",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "header",
+              "key": "cf-ray",
+              "value": "a5895e2f0dd91b87-IAD",
+              "strength": "strong"
+            },
+            {
+              "method": "header",
+              "key": "server",
+              "value": "cloudflare",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Klaviyo",
+          "category": "Marketing automation",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=QBD6nT",
+              "strength": "strong"
+            },
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://a.klaviyo.com/onsite/components/back-in-stock/subscribe",
+              "strength": "weak"
+            }
+          ]
+        },
+        {
+          "name": "Shopify",
+          "category": "Ecommerce",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "cookie",
+              "key": "_shopify_essential",
+              "value": "(cookie name)",
+              "strength": "strong"
+            },
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.shopify.com/shopifycloud/shop-js/modules/v2/loader.init-shop-cart-sync.en.esm.js",
+              "strength": "strong"
+            },
+            {
+              "method": "html",
+              "key": null,
+              "value": "Shopify.theme =",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Google Workspace (Gmail)",
+          "category": "Email infrastructure",
+          "confidence": 95,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "dns_mx",
+              "key": "dns_mx",
+              "value": "aspmx.l.google.com",
+              "strength": "strong"
+            }
+          ]
+        }
+      ],
+      "technologyCount": 4,
+      "ecommerce": {
+        "platform": {
+          "value": "Shopify",
+          "status": "confirmed"
+        },
+        "shopifyTheme": {
+          "name": "SDG Shopify Skeleton",
+          "status": "confirmed"
+        },
+        "currency": {
+          "value": "USD",
+          "status": "confirmed"
+        },
+        "apps": [
+          {
+            "name": "Klaviyo",
+            "status": "confirmed",
+            "evidence": "script/asset https://static.klaviyo.com/onsite/js/…"
+          },
+          {
+            "name": "Okendo",
+            "status": "confirmed",
+            "evidence": "script/asset https://cdn-static.okendo.io/reviews-widget-plus/js/…"
+          }
+        ]
+      },
+      "scannedAt": "2026-11-11T01:01:49.631Z"
+    },
+    {
+      "url": "https://drinkolipop.com/",
+      "finalUrl": "https://drinkolipop.com/",
+      "statusCode": 200,
+      "scanStatus": "ok",
+      "scanMode": "http",
+      "browserUsed": false,
+      "cms": null,
+      "ecommercePlatform": "Shopify",
+      "cdn": [
+        "Cloudflare",
+        "jsDelivr"
+      ],
+      "analytics": [
+        "Microsoft Clarity"
+      ],
+      "tagManagers": [],
+      "paymentProviders": [],
+      "marketingTools": [
+        "Klaviyo"
+      ],
+      "chatSupport": [],
+      "emailInfrastructure": [
+        "Microsoft 365 (Exchange Online)"
+      ],
+      "emailServices": [
+        "Mailgun"
+      ],
+      "dnsProvider": "Google Cloud DNS",
+      "webServer": null,
+      "consentManagement": [],
+      "video": [],
+      "fonts": [],
+      "javascriptLibraries": [],
+      "hosting": [],
+      "advertising": [],
+      "technologies": [
+        {
+          "name": "Cloudflare",
+          "category": "CDN",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "header",
+              "key": "cf-ray",
+              "value": "a5895e2e1bd5e87f-IAD",
+              "strength": "strong"
+            },
+            {
+              "method": "header",
+              "key": "server",
+              "value": "cloudflare",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Shopify",
+          "category": "Ecommerce",
+          "confidence": 99,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "cookie",
+              "key": "_shopify_essential",
+              "value": "(cookie name)",
+              "strength": "strong"
+            },
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.shopify.com/shopifycloud/shop-js/modules/v2/loader.init-shop-cart-sync.en.esm.js",
+              "strength": "strong"
+            },
+            {
+              "method": "html",
+              "key": null,
+              "value": "Shopify.theme =",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Klaviyo",
+          "category": "Marketing automation",
+          "confidence": 97,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://static.klaviyo.com/onsite/js/PbvgDc/klaviyo.js",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Google Cloud DNS",
+          "category": "DNS provider",
+          "confidence": 95,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "dns_ns",
+              "key": "dns_ns",
+              "value": "ns-cloud-b2.googledomains.com",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Microsoft Clarity",
+          "category": "Analytics",
+          "confidence": 95,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://www.clarity.ms/tag/",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "jsDelivr",
+          "category": "CDN",
+          "confidence": 90,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "resource",
+              "key": null,
+              "value": "https://cdn.jsdelivr.net/npm/keen-slider@latest/keen-slider.min.css",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Mailgun",
+          "category": "Email service",
+          "confidence": 60,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "dns_txt",
+              "key": "dns_txt",
+              "value": "v=spf1 include:usb._netblocks.mimecast.com include:spf-us.emailsignatures365.com include:spf.protection.outlook.com incl",
+              "strength": "weak"
+            }
+          ]
+        },
+        {
+          "name": "Microsoft 365 (Exchange Online)",
+          "category": "Email infrastructure",
+          "confidence": 60,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "dns_txt",
+              "key": "dns_txt",
+              "value": "v=spf1 include:usb._netblocks.mimecast.com include:spf-us.emailsignatures365.com include:spf.protection.outlook.com incl",
+              "strength": "weak"
+            }
+          ]
+        }
+      ],
+      "technologyCount": 8,
+      "ecommerce": {
+        "platform": {
+          "value": "Shopify",
+          "status": "confirmed"
+        },
+        "shopifyTheme": {
+          "name": "Olipop",
+          "status": "confirmed"
+        },
+        "currency": {
+          "value": "USD",
+          "status": "confirmed"
+        },
+        "apps": [
+          {
+            "name": "Klaviyo",
+            "status": "confirmed",
+            "evidence": "script/asset https://static.klaviyo.com/onsite/js/…"
+          }
+        ]
+      },
+      "scannedAt": "2026-11-11T01:01:49.656Z"
+    },
+    {
+      "url": "https://python.org/",
+      "finalUrl": "https://www.python.org/",
+      "statusCode": 200,
+      "scanStatus": "ok",
+      "scanMode": "http",
+      "browserUsed": false,
+      "cms": null,
+      "ecommercePlatform": null,
+      "cdn": [
+        "Fastly"
+      ],
+      "analytics": [],
+      "tagManagers": [],
+      "paymentProviders": [],
+      "marketingTools": [],
+      "chatSupport": [],
+      "emailInfrastructure": [],
+      "emailServices": [
+        "Mailgun"
+      ],
+      "dnsProvider": null,
+      "webServer": "nginx",
+      "consentManagement": [],
+      "video": [],
+      "fonts": [],
+      "javascriptLibraries": [
+        "jQuery"
+      ],
+      "hosting": [],
+      "advertising": [],
+      "technologies": [
+        {
+          "name": "nginx",
+          "category": "Web server",
+          "confidence": 95,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "header",
+              "key": "server",
+              "value": "nginx",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "jQuery",
+          "category": "JavaScript library",
+          "confidence": 85,
+          "evidenceStrength": "strong",
+          "evidence": [
+            {
+              "method": "script",
+              "key": null,
+              "value": "https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js",
+              "strength": "strong"
+            }
+          ]
+        },
+        {
+          "name": "Fastly",
+          "category": "CDN",
+          "confidence": 60,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "header",
+              "key": "x-served-by",
+              "value": "cache-iad-kcgs7200137-IAD, cache-iad-kcgs7200137-IAD, cache-iad-kcgs7270046-IAD, cache-bur-kbur8200126-BUR",
+              "strength": "weak"
+            }
+          ]
+        },
+        {
+          "name": "Mailgun",
+          "category": "Email service",
+          "confidence": 60,
+          "evidenceStrength": "weak",
+          "evidence": [
+            {
+              "method": "dns_txt",
+              "key": "dns_txt",
+              "value": "v=spf1 mx ip4:188.166.95.178/32 ip6:2a03:b0c0:2:d0::71:1 include:stspg-customer.com include:_spf.google.com include:mail",
+              "strength": "weak"
+            }
+          ]
+        }
+      ],
+      "technologyCount": 4,
+      "scannedAt": "2026-11-11T01:01:49.718Z"
+    }
+  ]
+}

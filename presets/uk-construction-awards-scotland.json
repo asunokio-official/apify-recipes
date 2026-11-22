@@ -1,0 +1,22 @@
+{
+  "id": "uk-construction-awards-scotland",
+  "actor": "uk-public-tenders-feed",
+  "title": "Who won construction contracts in Scotland (last 7 days)",
+  "who": "Subcontractors and suppliers who sell to the main contractor that just won.",
+  "schedule": "weekly",
+  "input": {
+    "noticeTypes": [
+      "award"
+    ],
+    "cpvPrefixes": [
+      "45"
+    ],
+    "regions": [
+      "UKM"
+    ],
+    "days": 7,
+    "onlyNew": false,
+    "maxItems": 200
+  },
+  "notes": "Scotland-only notices on Public Contracts Scotland are not included."
+}

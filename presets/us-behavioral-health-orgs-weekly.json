@@ -1,0 +1,20 @@
+{
+  "id": "us-behavioral-health-orgs-weekly",
+  "actor": "nppes-new-providers-feed",
+  "title": "New behavioral-health clinics and agencies, all US states, weekly",
+  "who": "Behavioral-health EHR, billing and staffing vendors.",
+  "schedule": "weekly",
+  "input": {
+    "entityTypes": [
+      "organization"
+    ],
+    "taxonomyPrefixes": [
+      "261QM0801X",
+      "251S00000X",
+      "261QR0405X"
+    ],
+    "excludeSubparts": true,
+    "maxItems": 1000
+  },
+  "notes": "Taxonomy codes: 261QM0801X mental health clinic, 251S00000X community/behavioral health agency, 261QR0405X substance use disorder rehab clinic."
+}

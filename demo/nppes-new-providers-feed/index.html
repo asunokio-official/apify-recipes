@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New NPI Providers Feed (CMS NPPES weekly files): sample output</title>
+<meta name="description" content="New NPI Providers Feed (CMS NPPES weekly files): sample output: real sample output, input presets and cost per run.">
+<style>body{font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;color:#1d232b;background:#fafbfc}
+main{max-width:1100px;margin:0 auto;padding:28px 20px 48px}h1{font-size:1.6rem;margin:.2em 0}h2{font-size:1.15rem;margin-top:2em}
+a{color:#0b5cad}.lead{font-size:1.05rem;color:#333}.box{background:#fff;border:1px solid #dde2e8;border-radius:8px;padding:14px 18px;margin:14px 0}
+.cta{display:inline-block;background:#0b5cad;color:#fff;text-decoration:none;padding:9px 16px;border-radius:6px;font-weight:600}
+.scroll{overflow-x:auto;background:#fff;border:1px solid #dde2e8;border-radius:8px}table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 9px;border-bottom:1px solid #edf0f3;text-align:left;vertical-align:top}th{background:#f3f5f8;white-space:nowrap}
+.muted{color:#98a1ad}.ev{color:#5b6573;font-size:12px}details ul{margin:.4em 0 0;padding-left:1.1em}code,pre{font:12.5px ui-monospace,Menlo,monospace}
+pre{background:#f3f5f8;padding:10px;border-radius:6px;overflow-x:auto}.note{font-size:13px;color:#5b6573}nav a{margin-right:12px}
+footer{margin-top:40px;font-size:12.5px;color:#5b6573}</style>
+</head>
+<body><main>
+<nav><a href="../index.html">All demos</a></nav>
+<h1>New NPI Providers Feed (CMS NPPES weekly files)</h1>
+<p class="lead">Get the healthcare providers and organizations that received a new NPI last week, filtered by state, category or taxonomy code, delivered once.</p>
+<p><a class="cta" href="https://apify.com/asunoki/nppes-new-providers-feed?utm_source=github&amp;utm_medium=recipes&amp;utm_campaign=nppes-new-providers-feed-demo">Open asunoki/nppes-new-providers-feed on Apify</a></p>
+<div class="box"><b>Price (pay per event):</b> $0.002 per new provider stored, plus a $0.00005 run-start fee. Rows you filter out or already received are free; maxItems caps every run. Prices checked 2026-11-22; the Pricing tab on Apify is authoritative.</div>
+<h2>Real sample output</h2>
+<p class="note">Real rows from a local run on 2026-11-22 (input: states [TX], maxItems 25), first 5 rows plus the free summary row. For this public demo, names, NPIs, licence numbers, street addresses, phones and registry links are replaced with '[redacted in demo]' and ZIP codes are cut to 3 digits. The Actor itself returns these fields (see its README for what it never returns).</p>
+<div class="scroll"><table><thead><tr><th>enumerationDate</th><th>entityType</th><th>name</th><th>credential</th><th>category</th><th>primaryTaxonomyCode</th><th>practiceCity</th><th>practiceState</th><th>practiceZip</th></tr></thead><tbody>
+<tr><td>2026-11-14</td><td>organization</td><td>[redacted in demo]</td><td><span class="muted">null</span></td><td>clinic-center</td><td>261QP2300X</td><td>GARDEN RIDGE</td><td>TX</td><td>782xx</td></tr>
+<tr><td>2026-11-14</td><td>organization</td><td>[redacted in demo]</td><td><span class="muted">null</span></td><td>agency</td><td>251E00000X</td><td>AUSTIN</td><td>TX</td><td>787xx</td></tr>
+<tr><td>2026-11-14</td><td>organization</td><td>[redacted in demo]</td><td><span class="muted">null</span></td><td>nursing-residential-facility</td><td>310400000X</td><td>HOUSTON</td><td>TX</td><td>770xx</td></tr>
+<tr><td>2026-11-14</td><td>individual</td><td>[redacted in demo]</td><td>AGACNP</td><td>nurse-practitioner</td><td>363LA2100X</td><td>BURLESON</td><td>TX</td><td>760xx</td></tr>
+<tr><td>2026-11-14</td><td>individual</td><td>[redacted in demo]</td><td>LMSW</td><td>behavioral-health</td><td>104100000X</td><td>WAXAHACHIE</td><td>TX</td><td>751xx</td></tr>
+</tbody></table></div>
+<p class="note">Every run also writes one free summary row, e.g. scanned 59464, matched 1542, charged 25, stopped by max_items.</p>
+<h2>Honest limits</h2>
+<ul><li>Weekly source: CMS publishes one file per week, about 1 to 2 days after the week ends. Only the two latest weeks exist, so schedule at least every 2 weeks.</li><li>A new NPI is an ID, not a licence, credential, Medicare enrolment or proof that a practice opened.</li><li>Individuals' street address and phone are off by default; no e-mail addresses exist in the source.</li></ul>
+<h2>Ready-made inputs</h2>
+<div class="box"><b>Weekly new NPIs in Texas for dental practices</b><br><span class="note">For: Dental supply, dental billing/RCM and practice-software sales teams who call on new dental practices. Schedule: weekly (Tuesday or Wednesday, after CMS posts the Monday-to-Sunday file). Max cost per run: $0.60005.</span>
+<pre>{
+  &quot;states&quot;: [
+    &quot;TX&quot;
+  ],
+  &quot;categories&quot;: [
+    &quot;dental&quot;
+  ],
+  &quot;excludeSubparts&quot;: true,
+  &quot;weeks&quot;: 2,
+  &quot;onlyNew&quot;: true,
+  &quot;maxItems&quot;: 300
+}</pre><span class="note">Run it: <code>node node/src/cli.js run tx-dental-new-npis-weekly --dry-run</code> (free preview), then with <code>APIFY_TOKEN</code> and <code>--yes</code>.</span></div>
+<div class="box"><b>New clinics and agencies in Texas and Oklahoma, weekly</b><br><span class="note">For: EHR, billing and credentialing vendors that sell to newly formed organizations. Schedule: weekly. Max cost per run: $1.00.</span>
+<pre>{
+  &quot;states&quot;: [
+    &quot;TX&quot;,
+    &quot;OK&quot;
+  ],
+  &quot;entityTypes&quot;: [
+    &quot;organization&quot;
+  ],
+  &quot;categories&quot;: [
+    &quot;clinic-center&quot;,
+    &quot;agency&quot;
+  ],
+  &quot;excludeSubparts&quot;: true,
+  &quot;maxItems&quot;: 500
+}</pre><span class="note">Run it: <code>node node/src/cli.js run tx-ok-new-clinics-agencies-weekly --dry-run</code> (free preview), then with <code>APIFY_TOKEN</code> and <code>--yes</code>.</span></div>
+<div class="box"><b>New behavioral-health clinics and agencies, all US states, weekly</b><br><span class="note">For: Behavioral-health EHR, billing and staffing vendors. Schedule: weekly. Max cost per run: $2.00.</span>
+<pre>{
+  &quot;entityTypes&quot;: [
+    &quot;organization&quot;
+  ],
+  &quot;taxonomyPrefixes&quot;: [
+    &quot;261QM0801X&quot;,
+    &quot;251S00000X&quot;,
+    &quot;261QR0405X&quot;
+  ],
+  &quot;excludeSubparts&quot;: true,
+  &quot;maxItems&quot;: 1000
+}</pre><span class="note">Run it: <code>node node/src/cli.js run us-behavioral-health-orgs-weekly --dry-run</code> (free preview), then with <code>APIFY_TOKEN</code> and <code>--yes</code>.</span></div>
+<div class="box"><b>New urgent-care centers anywhere in the US, weekly</b><br><span class="note">For: Urgent-care suppliers, staffing agencies and analysts tracking new openings. Schedule: weekly. Max cost per run: $0.60005.</span>
+<pre>{
+  &quot;taxonomyPrefixes&quot;: [
+    &quot;261QU0200X&quot;
+  ],
+  &quot;excludeSubparts&quot;: true,
+  &quot;maxItems&quot;: 300
+}</pre><span class="note">Run it: <code>node node/src/cli.js run us-urgent-care-new-weekly --dry-run</code> (free preview), then with <code>APIFY_TOKEN</code> and <code>--yes</code>.</span></div>
+<p class="note">Data: CMS NPPES Downloadable Files (public, FOIA-disclosable; US government work). Not affiliated with CMS or HHS. No NUCC taxonomy descriptions included.</p>
+<footer>Generated by scripts/build-demos.mjs in the asunoki-apify-recipes repository (MIT). Opening this page does not run anything and costs nothing. Apify is a trademark of Apify Technologies s.r.o.; this page is published by the Actor developer (ASUNOKI), not by Apify.</footer>
+</main></body>
+</html>

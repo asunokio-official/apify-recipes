@@ -1,0 +1,14 @@
+{
+  "id": "us-urgent-care-new-weekly",
+  "actor": "nppes-new-providers-feed",
+  "title": "New urgent-care centers anywhere in the US, weekly",
+  "who": "Urgent-care suppliers, staffing agencies and analysts tracking new openings.",
+  "schedule": "weekly",
+  "input": {
+    "taxonomyPrefixes": [
+      "261QU0200X"
+    ],
+    "excludeSubparts": true,
+    "maxItems": 300
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "tx-ok-new-clinics-agencies-weekly",
+  "actor": "nppes-new-providers-feed",
+  "title": "New clinics and agencies in Texas and Oklahoma, weekly",
+  "who": "EHR, billing and credentialing vendors that sell to newly formed organizations.",
+  "schedule": "weekly",
+  "input": {
+    "states": [
+      "TX",
+      "OK"
+    ],
+    "entityTypes": [
+      "organization"
+    ],
+    "categories": [
+      "clinic-center",
+      "agency"
+    ],
+    "excludeSubparts": true,
+    "maxItems": 500
+  }
+}

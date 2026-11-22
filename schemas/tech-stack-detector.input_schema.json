@@ -1,0 +1,108 @@
+{
+  "title": "Website Technology Stack Detector",
+  "description": "Give it domains or URLs; get the technologies each site uses, with the evidence for every detection. Plain HTTP scan by default; browser rendering is optional and costs more.",
+  "type": "object",
+  "schemaVersion": 1,
+  "required": [
+    "urls"
+  ],
+  "properties": {
+    "urls": {
+      "title": "URLs or domains",
+      "type": "array",
+      "editor": "stringList",
+      "minItems": 1,
+      "maxItems": 10000,
+      "description": "Bulk input: one domain or URL per line, up to 10,000. Plain domains (example.com) and full URLs are accepted; https:// is assumed when missing; duplicates are removed. Each site is fetched once.",
+      "prefill": [
+        "colourpop.com",
+        "tentree.com",
+        "beardbrand.com"
+      ]
+    },
+    "browserFallback": {
+      "title": "Browser fallback for JavaScript-only pages (optional, slower, higher price)",
+      "type": "boolean",
+      "default": false,
+      "sectionCaption": "Scan mode",
+      "sectionDescription": "The default is a plain HTTP scan: one page request plus DNS and TLS lookups, typically 2–4 seconds per site. Browser rendering is optional and changes speed and price.",
+      "description": "OFF by default. When ON, a page that returns only a thin JavaScript shell (little visible text after a plain request) is re-rendered in headless Chromium so runtime-loaded technologies become visible. This makes those pages take roughly 10–30 seconds instead of 2–4 seconds and bills them as a Full scan instead of a Basic scan. Pages that do not need it stay Basic. Blocked pages are never retried in a browser."
+    },
+    "alwaysUseBrowser": {
+      "title": "Render every page in a browser (slowest, highest price)",
+      "type": "boolean",
+      "default": false,
+      "description": "OFF by default. Renders every reachable page in headless Chromium to catch tags injected after page load (for example analytics loaded through a tag manager). Roughly 10–30 seconds per page, at most 2 pages at a time, and every successfully rendered page is billed as a Full scan. If the browser step fails on a site, its plain-HTTP result is returned, billed as Basic, and `browserError` explains why. Blocked pages are never retried or bypassed."
+    },
+    "respectRobotsTxt": {
+      "title": "Respect robots.txt",
+      "type": "boolean",
+      "default": true,
+      "sectionCaption": "Politeness and limits",
+      "description": "ON by default and recommended. Before scanning a site the Actor reads its /robots.txt (once per host) and skips the page if the rules disallow it for this Actor's user agent (TechStackDetector) or for all bots. Skipped pages are reported as `skipped_robots` and are not billed. A missing robots.txt (4xx) allows scanning; a server error (5xx) is treated as disallow, as in RFC 9309. Turn this OFF only for sites you own or have permission to scan; you are responsible for that choice."
+    },
+    "maxConcurrency": {
+      "title": "Max concurrency",
+      "type": "integer",
+      "default": 10,
+      "minimum": 1,
+      "maximum": 100,
+      "description": "How many websites are scanned in parallel. Requests to the same host are never sent in parallel. Browser rendering is capped at 2 pages at a time regardless of this value."
+    },
+    "timeoutSecs": {
+      "title": "Timeout per website (seconds)",
+      "type": "integer",
+      "default": 20,
+      "minimum": 3,
+      "maximum": 120,
+      "description": "Time limit for each website's page request. Sites that do not answer in time are reported as `timeout` and are not billed."
+    },
+    "includeDns": {
+      "title": "Include DNS lookups",
+      "type": "boolean",
+      "default": true,
+      "sectionCaption": "Output",
+      "description": "Resolve A/AAAA/CNAME, name servers, MX and SPF records. Used to detect the DNS provider, the mailbox provider (from MX) and email services authorized in SPF. An SPF entry only shows that a service may send mail for the domain, so it is reported with low confidence."
+    },
+    "includeTls": {
+      "title": "Include TLS certificate info",
+      "type": "boolean",
+      "default": true,
+      "description": "Read the certificate issuer, expiry and protocol. No page content is involved."
+    },
+    "includeEvidence": {
+      "title": "Include evidence for each detection",
+      "type": "boolean",
+      "default": true,
+      "description": "Return the exact signal (response header, meta tag, script URL, cookie name, DNS record) that led to every detection, with a strength flag (`strong` or `weak`). Turn off for smaller output."
+    },
+    "ecommerceSignals": {
+      "title": "E-commerce signals (optional)",
+      "type": "boolean",
+      "default": false,
+      "description": "OFF by default; with it off the output is unchanged. When ON, each successfully scanned page gets an extra `ecommerce` object built only from the page that was already fetched (no extra requests, no extra charge): platform, Shopify theme name / theme store id (from the public `Shopify.theme` object), shop currency, a short list of storefront apps with a concrete script signal, and payment-method hints that the page itself shows. Each value carries an `evidence` string; a value with no evidence is left out. No e-mail addresses, phone numbers or customer data are collected."
+    },
+    "minConfidence": {
+      "title": "Minimum confidence",
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 99,
+      "description": "Drop detections below this confidence (1–99) from the output. 0 keeps everything. Weak inferences (for example an SPF include or a preconnect hint) never score above 60, so a value of 65–70 returns only detections backed by direct evidence."
+    },
+    "expectedTechnologies": {
+      "sectionCaption": "Audit (optional)",
+      "sectionDescription": "Leave empty for a normal scan. Fill in to get pass / fail / unknown per site for technologies you expect (or forbid). The price is the same: you pay only for the scan.",
+      "title": "Expected technologies",
+      "type": "array",
+      "editor": "stringList",
+      "description": "Technologies that should be on every site, using names from the supported list (case does not matter), e.g. Google Tag Manager, Cookiebot. A site gets \"fail\" if one is not detected, \"unknown\" if the page could not be scanned or the evidence is only weak."
+    },
+    "forbiddenTechnologies": {
+      "title": "Forbidden technologies",
+      "type": "array",
+      "editor": "stringList",
+      "description": "Technologies that should NOT be on the sites, e.g. Universal Analytics. A site gets \"fail\" if one is detected with strong evidence."
+    }
+  }
+}

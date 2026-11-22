@@ -1,0 +1,84 @@
+{
+  "startFeeUsdPerGb": 0.00005,
+  "pricesCheckedOn": "2026-11-22",
+  "actors": {
+    "nppes-new-providers-feed": {
+      "actorId": "asunoki/nppes-new-providers-feed",
+      "title": "New NPI Providers Feed (CMS NPPES weekly files)",
+      "storeUrl": "https://apify.com/asunoki/nppes-new-providers-feed",
+      "event": "provider",
+      "priceUsd": 0.002,
+      "unit": "new provider stored",
+      "memoryMb": 512,
+      "defaultMaxItems": 500,
+      "rowType": "provider",
+      "columns": ["enumerationDate", "entityType", "name", "credential", "category", "primaryTaxonomyCode", "taxonomyCodes", "practiceCity", "practiceState", "practiceZip", "practicePhone", "isOrganizationSubpart", "parentOrganizationName", "npi", "npiRegistryUrl"],
+      "slackLine": "{name} ({category}, {primaryTaxonomyCode}) {practiceCity}, {practiceState} | NPI issued {enumerationDate}",
+      "linkField": "npiRegistryUrl",
+      "limits": [
+        "Weekly source: CMS publishes one file per week, about 1 to 2 days after the week ends. Only the two latest weeks exist, so schedule at least every 2 weeks.",
+        "A new NPI is an ID, not a licence, credential, Medicare enrolment or proof that a practice opened.",
+        "Individuals' street address and phone are off by default; no e-mail addresses exist in the source."
+      ]
+    },
+    "us-building-permits-feed": {
+      "actorId": "asunoki/us-building-permits-feed",
+      "title": "US Building Permits Feed (San Francisco, Austin, New Orleans)",
+      "storeUrl": "https://apify.com/asunoki/us-building-permits-feed",
+      "event": "permit",
+      "priceUsd": 0.002,
+      "unit": "new permit stored",
+      "memoryMb": 256,
+      "defaultMaxItems": 200,
+      "rowType": "permit",
+      "columns": ["issuedDate", "city", "permitNumber", "permitType", "permitClass", "workType", "status", "valueUsd", "address", "zip", "latitude", "longitude", "housingUnits", "contractorCompany", "description", "permitUrl"],
+      "slackLine": "{city} {permitType} {workType} | ${valueUsd} | {address} | issued {issuedDate}",
+      "linkField": "permitUrl",
+      "limits": [
+        "Three cities only: San Francisco, Austin and New Orleans (sources with an explicit public-domain or CC0 licence).",
+        "Not real time: permits usually appear 1 to 3 days after issue.",
+        "No owner, applicant or personal contractor names, no phones, no e-mails. Declared values are self-reported."
+      ]
+    },
+    "uk-public-tenders-feed": {
+      "actorId": "asunoki/uk-public-tenders-feed",
+      "title": "UK Public Tenders Feed (Find a Tender + Contracts Finder)",
+      "storeUrl": "https://apify.com/asunoki/uk-public-tenders-feed",
+      "event": "notice",
+      "priceUsd": 0.004,
+      "unit": "new notice stored",
+      "memoryMb": 256,
+      "defaultMaxItems": 200,
+      "rowType": "notice",
+      "columns": ["publishedAt", "noticeType", "title", "buyerName", "buyerRegion", "estimatedValue", "currency", "submissionDeadline", "mainCpv", "mainCpvDescription", "cpvCodes", "deliveryRegions", "suitableForSme", "procedure", "suppliers[].name", "awardedValue", "awardDate", "source", "noticeUrl"],
+      "slackLine": "{title} | {buyerName} | {currency} {estimatedValue} | deadline {submissionDeadline}",
+      "linkField": "noticeUrl",
+      "limits": [
+        "Find a Tender and Contracts Finder only; notices only on Public Contracts Scotland, Sell2Wales or eTendersNI are not included.",
+        "About a third of notices have no value; values are as published, currencies are not converted.",
+        "No contact officer names, e-mails or phones. Tender documents are not downloaded."
+      ]
+    },
+    "tech-stack-detector": {
+      "actorId": "asunoki/tech-stack-detector",
+      "title": "Tech Stack Detector (CMS, Shopify/WooCommerce, hosting, analytics, with evidence)",
+      "storeUrl": "https://apify.com/asunoki/tech-stack-detector",
+      "event": "basic-scan",
+      "priceUsd": 0.005,
+      "browserEvent": "full-scan",
+      "browserPriceUsd": 0.015,
+      "unit": "website scanned successfully",
+      "memoryMb": 512,
+      "browserMemoryMb": 2048,
+      "countFrom": "urls",
+      "columns": ["url", "finalUrl", "scanStatus", "ecommercePlatform", "ecommerce.shopifyTheme.name", "ecommerce.currency.value", "ecommerce.apps[].name", "cms", "hosting", "cdn", "dnsProvider", "emailInfrastructure", "analytics", "tagManagers", "advertising", "paymentProviders", "marketingTools", "chatSupport", "technologyCount", "technologies[].name"],
+      "slackLine": "{url} | platform {ecommercePlatform} | CMS {cms} | hosting {hosting} | {technologyCount} technologies",
+      "linkField": "url",
+      "limits": [
+        "Checks the websites you give it; it does not find new companies or build lead lists.",
+        "Unknown means not detected, never not used: tools loaded after consent, at checkout or by inline loaders can be missed.",
+        "Blocked, robots.txt-skipped and failed websites are returned with the reason and are free; no bypass is attempted."
+      ]
+    }
+  }
+}

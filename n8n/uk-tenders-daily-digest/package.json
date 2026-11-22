@@ -1,0 +1,11 @@
+{
+  "name": "n8n-uk-tenders-daily-digest",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node build.mjs --check && node validate.mjs",
+    "test": "node --test \"test/**/*.test.js\""
+  }
+}

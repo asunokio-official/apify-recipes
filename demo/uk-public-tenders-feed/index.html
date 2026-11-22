@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UK Public Tenders Feed (Find a Tender + Contracts Finder): sample output</title>
+<meta name="description" content="UK Public Tenders Feed (Find a Tender + Contracts Finder): sample output: real sample output, input presets and cost per run.">
+<style>body{font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;color:#1d232b;background:#fafbfc}
+main{max-width:1100px;margin:0 auto;padding:28px 20px 48px}h1{font-size:1.6rem;margin:.2em 0}h2{font-size:1.15rem;margin-top:2em}
+a{color:#0b5cad}.lead{font-size:1.05rem;color:#333}.box{background:#fff;border:1px solid #dde2e8;border-radius:8px;padding:14px 18px;margin:14px 0}
+.cta{display:inline-block;background:#0b5cad;color:#fff;text-decoration:none;padding:9px 16px;border-radius:6px;font-weight:600}
+.scroll{overflow-x:auto;background:#fff;border:1px solid #dde2e8;border-radius:8px}table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 9px;border-bottom:1px solid #edf0f3;text-align:left;vertical-align:top}th{background:#f3f5f8;white-space:nowrap}
+.muted{color:#98a1ad}.ev{color:#5b6573;font-size:12px}details ul{margin:.4em 0 0;padding-left:1.1em}code,pre{font:12.5px ui-monospace,Menlo,monospace}
+pre{background:#f3f5f8;padding:10px;border-radius:6px;overflow-x:auto}.note{font-size:13px;color:#5b6573}nav a{margin-right:12px}
+footer{margin-top:40px;font-size:12.5px;color:#5b6573}</style>
+</head>
+<body><main>
+<nav><a href="../index.html">All demos</a></nav>
+<h1>UK Public Tenders Feed (Find a Tender + Contracts Finder)</h1>
+<p class="lead">Get new UK public-sector tenders and contract awards from Find a Tender and Contracts Finder, filtered by CPV code, region and value, delivered once.</p>
+<p><a class="cta" href="https://apify.com/asunoki/uk-public-tenders-feed?utm_source=github&amp;utm_medium=recipes&amp;utm_campaign=uk-public-tenders-feed-demo">Open asunoki/uk-public-tenders-feed on Apify</a></p>
+<div class="box"><b>Price (pay per event):</b> $0.004 per new notice stored, plus a $0.00005 run-start fee. Rows you filter out or already received are free; maxItems caps every run. Prices checked 2026-11-22; the Pricing tab on Apify is authoritative.</div>
+<h2>Real sample output</h2>
+<p class="note">Real rows from a local run on 2026-11-22 (award notices shown). Contains public sector information licensed under the Open Government Licence v3.0.</p>
+<div class="scroll"><table><thead><tr><th>publishedAt</th><th>noticeType</th><th>title</th><th>buyerName</th><th>mainCpvDescription</th><th>estimatedValue</th><th>awardedValue</th><th>suppliers[].name</th><th>noticeUrl</th></tr></thead><tbody>
+<tr><td>2026-11-20</td><td>award</td><td>Provision of Laptops</td><td>Nursing And Midwifery Council</td><td>Portable computers</td><td>241,000</td><td>241,000</td><td>CDW UK</td><td><a href="https://www.contractsfinder.service.gov.uk/Notice/d991582b-b97f-48c9-a726-a12bba6aa933" rel="nofollow">notice</a></td></tr>
+<tr><td>2026-11-20</td><td>award</td><td>Supply of Sports Kit to USW</td><td>University of South Wales</td><td><span class="muted">null</span></td><td><span class="muted">null</span></td><td>238,688.85</td><td>Toppers Wales Ltd</td><td><a href="https://www.find-tender.service.gov.uk/Notice/110367-2026" rel="nofollow">notice</a></td></tr>
+<tr><td>2026-11-20</td><td>award</td><td>Care Home Brokerage Services</td><td>The Dudley Group NHS Foundation Trust</td><td><span class="muted">null</span></td><td><span class="muted">null</span></td><td>900,000</td><td>How to Find a Care Home</td><td><a href="https://www.find-tender.service.gov.uk/Notice/110365-2026" rel="nofollow">notice</a></td></tr>
+</tbody></table></div>
+<p class="note">Every run also writes one free summary row, e.g. scanned 1102, matched 869, charged 15, stopped by max_items.</p>
+<h2>Honest limits</h2>
+<ul><li>Find a Tender and Contracts Finder only; notices only on Public Contracts Scotland, Sell2Wales or eTendersNI are not included.</li><li>About a third of notices have no value; values are as published, currencies are not converted.</li><li>No contact officer names, e-mails or phones. Tender documents are not downloaded.</li></ul>
+<h2>Ready-made inputs</h2>
+<div class="box"><b>Who won construction contracts in Scotland (last 7 days)</b><br><span class="note">For: Subcontractors and suppliers who sell to the main contractor that just won. Schedule: weekly. Max cost per run: $0.80005.</span>
+<pre>{
+  &quot;noticeTypes&quot;: [
+    &quot;award&quot;
+  ],
+  &quot;cpvPrefixes&quot;: [
+    &quot;45&quot;
+  ],
+  &quot;regions&quot;: [
+    &quot;UKM&quot;
+  ],
+  &quot;days&quot;: 7,
+  &quot;onlyNew&quot;: false,
+  &quot;maxItems&quot;: 200
+}</pre><span class="note">Run it: <code>node node/src/cli.js run uk-construction-awards-scotland --dry-run</code> (free preview), then with <code>APIFY_TOKEN</code> and <code>--yes</code>.</span></div>
+<div class="box"><b>UK IT and software tenders worth GBP 100k or more (weekly)</b><br><span class="note">For: IT suppliers, software vendors and bid writers looking for open opportunities. Schedule: weekly (days 10 so nothing falls between runs). Max cost per run: $1.20.</span>
+<pre>{
+  &quot;noticeTypes&quot;: [
+    &quot;opportunity&quot;
+  ],
+  &quot;cpvPrefixes&quot;: [
+    &quot;72&quot;,
+    &quot;48&quot;
+  ],
+  &quot;minValueGbp&quot;: 100000,
+  &quot;includeUnknownValue&quot;: false,
+  &quot;openOnly&quot;: true,
+  &quot;days&quot;: 10,
+  &quot;onlyNew&quot;: true,
+  &quot;maxItems&quot;: 300
+}</pre><span class="note">Run it: <code>node node/src/cli.js run uk-it-tenders-100k-weekly --dry-run</code> (free preview), then with <code>APIFY_TOKEN</code> and <code>--yes</code>.</span></div>
+<div class="box"><b>UK IT tenders in London and the South East (daily)</b><br><span class="note">For: Regional IT suppliers and agencies. Schedule: daily (days 3). Max cost per run: $0.80005.</span>
+<pre>{
+  &quot;noticeTypes&quot;: [
+    &quot;opportunity&quot;
+  ],
+  &quot;cpvPrefixes&quot;: [
+    &quot;72&quot;,
+    &quot;48&quot;
+  ],
+  &quot;regions&quot;: [
+    &quot;UKI&quot;,
+    &quot;UKJ&quot;
+  ],
+  &quot;minValueGbp&quot;: 100000,
+  &quot;days&quot;: 3,
+  &quot;maxItems&quot;: 200
+}</pre><span class="note">Run it: <code>node node/src/cli.js run uk-it-tenders-london-se-daily --dry-run</code> (free preview), then with <code>APIFY_TOKEN</code> and <code>--yes</code>.</span></div>
+<div class="box"><b>UK marketing, advertising and PR tenders suitable for SMEs</b><br><span class="note">For: Small agencies bidding for public-sector marketing work. Schedule: weekly. Max cost per run: $0.80005.</span>
+<pre>{
+  &quot;noticeTypes&quot;: [
+    &quot;opportunity&quot;
+  ],
+  &quot;cpvPrefixes&quot;: [
+    &quot;7934&quot;,
+    &quot;79416&quot;,
+    &quot;79341&quot;
+  ],
+  &quot;smeSuitableOnly&quot;: true,
+  &quot;days&quot;: 10,
+  &quot;maxItems&quot;: 200
+}</pre><span class="note">Run it: <code>node node/src/cli.js run uk-marketing-tenders-sme --dry-run</code> (free preview), then with <code>APIFY_TOKEN</code> and <code>--yes</code>.</span></div>
+<p class="note">Contains public sector information licensed under the Open Government Licence v3.0. Not affiliated with the Cabinet Office or GOV.UK.</p>
+<footer>Generated by scripts/build-demos.mjs in the asunoki-apify-recipes repository (MIT). Opening this page does not run anything and costs nothing. Apify is a trademark of Apify Technologies s.r.o.; this page is published by the Actor developer (ASUNOKI), not by Apify.</footer>
+</main></body>
+</html>

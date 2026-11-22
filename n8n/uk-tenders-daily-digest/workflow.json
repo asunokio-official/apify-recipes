@@ -1,0 +1,538 @@
+{
+  "name": "UK public tenders: daily digest to Slack (Apify, Find a Tender + Contracts Finder)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "ukt-001-2af00e23",
+      "name": "Run now",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 7 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "ukt-002-98aaa402",
+      "name": "Weekdays 07:30 (enable after a test run)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        480
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ukt-set-21d4b162",
+              "name": "digestTitle",
+              "value": "New UK public tenders",
+              "type": "string"
+            },
+            {
+              "id": "ukt-set-daa81418",
+              "name": "noticeTypes",
+              "value": "opportunity",
+              "type": "string"
+            },
+            {
+              "id": "ukt-set-b72c4225",
+              "name": "cpvPrefixes",
+              "value": "72,48",
+              "type": "string"
+            },
+            {
+              "id": "ukt-set-7ff078f2",
+              "name": "regions",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "ukt-set-88fc09e5",
+              "name": "keywords",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "ukt-set-351eaad8",
+              "name": "excludeKeywords",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "ukt-set-0e2fe874",
+              "name": "minValueGbp",
+              "value": 100000,
+              "type": "number"
+            },
+            {
+              "id": "ukt-set-5548ae4f",
+              "name": "days",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "ukt-set-e58603a4",
+              "name": "maxItems",
+              "value": 100,
+              "type": "number"
+            },
+            {
+              "id": "ukt-set-88925a0a",
+              "name": "maxTotalChargeUsd",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "ukt-set-f147f1c3",
+              "name": "maxLinesInDigest",
+              "value": 15,
+              "type": "number"
+            },
+            {
+              "id": "ukt-set-0e6b6b75",
+              "name": "stateStoreName",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "ukt-set-2036a7cb",
+              "name": "useMockData",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "ukt-set-5c732b46",
+              "name": "slackEnabled",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "ukt-set-260da2e2",
+              "name": "slackChannel",
+              "value": "#tenders",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ukt-003-c7f73bb5",
+      "name": "Settings",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        380
+      ],
+      "notes": "Comma-separated lists. CPV: 72 IT services, 48 software, 45 construction, 79 business services, 85 health/social, 90 environmental. Regions: UKC..UKN (UKI London, UKM Scotland). maxTotalChargeUsd 0 = use the maxItems estimate."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code-node logic for the \"UK tenders daily digest\" n8n workflow.\n// build.mjs inlines these functions into the Code nodes, so the unit-tested code is the code in workflow.json.\n// Keep this file free of imports: n8n Code nodes run it as plain JavaScript.\n\nconst NOTICE_PRICE_USD = 0.004; // asunoki/uk-public-tenders-feed, event \"notice\" (check the Actor's Pricing tab)\nconst START_FEE_USD = 0.00005; // Apify run-start event at 256 MB\n\nfunction splitList(value) {\n  if (Array.isArray(value)) return value.map((v) => String(v).trim()).filter(Boolean);\n  return String(value ?? '').split(',').map((v) => v.trim()).filter(Boolean);\n}\n\nfunction toInt(value, fallback, min, max) {\n  const n = Number(value);\n  if (!Number.isFinite(n) || String(value ?? '').trim() === '') return fallback;\n  return Math.min(max, Math.max(min, Math.round(n)));\n}\n\n/** Settings node -> Actor input, cost estimate and spend cap. */\nfunction buildActorInput(s) {\n  const types = splitList(s.noticeTypes);\n  const input = {\n    noticeTypes: types.length ? types : ['opportunity'],\n    cpvPrefixes: splitList(s.cpvPrefixes),\n    keywords: splitList(s.keywords),\n    excludeKeywords: splitList(s.excludeKeywords),\n    regions: splitList(s.regions).map((r) => r.toUpperCase()),\n    days: toInt(s.days, 3, 1, 30),\n    onlyNew: true,\n    openOnly: true,\n    maxItems: toInt(s.maxItems, 100, 1, 10000),\n  };\n  for (const t of input.noticeTypes) {\n    if (!['opportunity', 'planning', 'award', 'update'].includes(t)) throw new Error(`Notice type \"${t}\" must be opportunity, planning, award or update.`);\n  }\n  for (const c of input.cpvPrefixes) {\n    if (!/^\\d{2,8}$/.test(c)) throw new Error(`CPV prefix \"${c}\" must be 2 to 8 digits.`);\n  }\n  if (Number(s.minValueGbp) > 0) input.minValueGbp = Math.round(Number(s.minValueGbp));\n  if (s.stateStoreName) input.stateStoreName = String(s.stateStoreName);\n  for (const k of ['cpvPrefixes', 'keywords', 'excludeKeywords', 'regions']) if (!input[k].length) delete input[k];\n  const estimateUsd = Math.round((input.maxItems * NOTICE_PRICE_USD + START_FEE_USD) * 1e6) / 1e6;\n  const cap = Number(s.maxTotalChargeUsd) > 0 ? Number(s.maxTotalChargeUsd) : estimateUsd;\n  return {\n    actorInput: input,\n    maxTotalChargeUsd: cap,\n    estimateUsd,\n    estimateText: `Max cost of this run: $${estimateUsd.toFixed(2)} (${input.maxItems} notices x $${NOTICE_PRICE_USD} + start fee); spend cap $${cap.toFixed(2)}. Filtered-out and already-seen notices are free.`,\n  };\n}\n\nfunction esc(t) {\n  return String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\n}\n\nfunction money(n, cur) {\n  if (n == null || n === '') return 'value not published';\n  return `${cur || 'GBP'} ${Math.round(Number(n)).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',')}`;\n}\n\nfunction day(iso) {\n  return iso ? String(iso).slice(0, 10) : 'n/a';\n}\n\n/** Actor dataset items (plus an error item if the run failed) -> Slack text and HTML digest. */\nfunction buildDigest(items, settings, plan) {\n  const error = items.find((i) => i && i.error);\n  const notices = items.filter((i) => i && i.type === 'notice');\n  const summaries = items.filter((i) => i && i.type === 'summary');\n  const summary = summaries.length ? summaries[summaries.length - 1] : null;\n  notices.sort((a, b) => String(a.submissionDeadline || '9999').localeCompare(String(b.submissionDeadline || '9999')));\n  const maxLines = toInt(settings.maxLinesInDigest, 15, 1, 100);\n  const title = settings.digestTitle || 'New UK public tenders';\n  const charged = summary && Number.isFinite(summary.charged) ? summary.charged : notices.length;\n  const costLine = `Cost: ${charged} notice(s) charged x $${NOTICE_PRICE_USD}, about $${(charged * NOTICE_PRICE_USD + START_FEE_USD).toFixed(3)} with the start fee`;\n\n  const lines = notices.slice(0, maxLines).map((n) => `• <${n.noticeUrl}|${esc(n.title)}>\\n   ${esc(n.buyerName)} | ${money(n.estimatedValue, n.currency)} | deadline ${day(n.submissionDeadline)} | CPV ${n.mainCpv || 'n/a'}`);\n  if (notices.length > maxLines) lines.push(`…and ${notices.length - maxLines} more in the Apify dataset.`);\n  const errText = error ? (error.error && error.error.message) || error.message || String(error.error) : '';\n  const parts = [`*${esc(title)}*: ${notices.length} new notice(s)`];\n  if (error) parts.push(`:warning: The Actor run failed: ${esc(errText)}`);\n  if (summary && summary.moreAvailable) parts.push('More notices matched than maxItems allowed; they stay new for the next run.');\n  parts.push(...lines);\n  parts.push(`_${costLine}._`);\n\n  const rows = notices.slice(0, maxLines).map((n) => `<tr><td><a href=\"${esc(n.noticeUrl)}\">${esc(n.title)}</a></td><td>${esc(n.buyerName)}</td><td>${esc(money(n.estimatedValue, n.currency))}</td><td>${esc(day(n.submissionDeadline))}</td></tr>`).join('');\n  return {\n    count: notices.length,\n    failed: Boolean(error),\n    shouldSend: notices.length > 0 || Boolean(error),\n    text: parts.join('\\n'),\n    html: `<h3>${esc(title)}: ${notices.length} new notice(s)</h3>${error ? '<p><b>The Actor run failed.</b></p>' : ''}<table border=\"1\" cellpadding=\"4\" cellspacing=\"0\"><tr><th>Notice</th><th>Buyer</th><th>Value</th><th>Deadline</th></tr>${rows}</table><p><small>${esc(costLine)}. ${plan ? esc(plan.estimateText) : ''} Contains public sector information licensed under the Open Government Licence v3.0.</small></p>`,\n    summary,\n  };\n}\n\nconst plan = buildActorInput($('Settings').first().json);\nreturn [{ json: plan }];"
+      },
+      "id": "ukt-004-a9e33cda",
+      "name": "Build Actor input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        380
+      ],
+      "notes": "Builds the Actor input from Settings and computes the cost estimate and spend cap."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ukt-if-6b2e37da",
+              "leftValue": "={{ $('Settings').first().json.useMockData }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ukt-005-6b2e37da",
+      "name": "Use mock data?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Redacted real rows from a local run on 2026-11-22 (award notices) plus the free summary row.\n// TEST DATA ONLY: used while useMockData is true. Contains public sector information licensed under the OGL v3.0.\nconst rows = [\n  {\n    \"type\": \"notice\",\n    \"source\": \"contracts-finder\",\n    \"noticeId\": \"d991582b-b97f-48c9-a726-a12bba6aa933\",\n    \"releaseId\": \"d991582b-b97f-48c9-a726-a12bba6aa933-922252\",\n    \"ocid\": \"ocds-b5fd17-48db6cd2-cabf-4498-8255-a1635c8180e6\",\n    \"noticeType\": \"award\",\n    \"ocdsTags\": [\n      \"award\"\n    ],\n    \"noticeForm\": null,\n    \"noticeFormName\": null,\n    \"publishedAt\": \"2026-11-20T20:21:31Z\",\n    \"title\": \"Provision of Laptops\",\n    \"description\": \"To provide up to a maximum of 200 Laptops.\\n\\nUnder the Health Trust Europe Framework - ICT Solutions 3.\",\n    \"status\": \"complete\",\n    \"mainCategory\": \"goods\",\n    \"procedure\": \"Call-off from a framework agreement\",\n    \"legalBasis\": null,\n    \"aboveThreshold\": null,\n    \"frameworkAgreement\": null,\n    \"mainCpv\": \"30213100\",\n    \"mainCpvDescription\": \"Portable computers\",\n    \"cpvCodes\": [\n      \"30213100\"\n    ],\n    \"estimatedValue\": 241000,\n    \"estimatedValueInclVat\": null,\n    \"minimumValue\": null,\n    \"currency\": \"GBP\",\n    \"submissionDeadline\": \"2026-10-12T17:00:00+01:00\",\n    \"expressionOfInterestDeadline\": null,\n    \"enquiryDeadline\": null,\n    \"contractStart\": \"2026-10-21T00:00:00+01:00\",\n    \"contractEnd\": \"2027-10-20T23:59:59+01:00\",\n    \"lots\": null,\n    \"suitableForSme\": false,\n    \"suitableForVcse\": false,\n    \"deliveryRegions\": [],\n    \"deliveryRegionNames\": [],\n    \"buyerName\": \"Nursing And Midwifery Council\",\n    \"buyerId\": \"GB-SRS-sid4gov.cabinetoffice.gov.uk/FxGd77hQ\",\n    \"buyerType\": null,\n    \"buyerLocality\": \"LONDON\",\n    \"buyerPostcode\": \"W1B1PZ\",\n    \"buyerRegion\": null,\n    \"buyerWebsite\": null,\n    \"awardedValue\": 241000,\n    \"awardDate\": \"2026-10-19T00:00:00+01:00\",\n    \"suppliers\": [\n      {\n        \"name\": \"CDW UK\",\n        \"id\": \"GB-COH-02465350\",\n        \"scale\": \"large\"\n      }\n    ],\n    \"noticeUrl\": \"https://www.contractsfinder.service.gov.uk/Notice/d991582b-b97f-48c9-a726-a12bba6aa933\",\n    \"license\": \"Contains public sector information licensed under the Open Government Licence v3.0 (Find a Tender / Contracts Finder, Cabinet Office). https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/\",\n    \"fetchedAt\": \"2026-11-22T06:41:58.706Z\"\n  },\n  {\n    \"type\": \"notice\",\n    \"source\": \"find-a-tender\",\n    \"noticeId\": \"110367-2026\",\n    \"releaseId\": \"110367-2026\",\n    \"ocid\": \"ocds-h6vhtk-06f366\",\n    \"noticeType\": \"award\",\n    \"ocdsTags\": [\n      \"award\",\n      \"contract\"\n    ],\n    \"noticeForm\": \"UK6\",\n    \"noticeFormName\": \"Contract award notice\",\n    \"publishedAt\": \"2026-11-20T19:18:39Z\",\n    \"title\": \"Supply of Sports Kit to USW\",\n    \"description\": \"The University of South Wales is seeking to appoint a supplier for the supply, branding, personalisation and delivery of sports kit and associated clothing. The contract covers sports kit requirements for University students, academic staff and operational staff.\",\n    \"status\": \"complete\",\n    \"mainCategory\": null,\n    \"procedure\": \"Open procedure\",\n    \"legalBasis\": \"Procurement Act 2023\",\n    \"aboveThreshold\": null,\n    \"frameworkAgreement\": null,\n    \"mainCpv\": \"18412000\",\n    \"mainCpvDescription\": null,\n    \"cpvCodes\": [\n      \"18412000\"\n    ],\n    \"estimatedValue\": null,\n    \"estimatedValueInclVat\": null,\n    \"minimumValue\": null,\n    \"currency\": \"GBP\",\n    \"submissionDeadline\": null,\n    \"expressionOfInterestDeadline\": null,\n    \"enquiryDeadline\": null,\n    \"contractStart\": null,\n    \"contractEnd\": null,\n    \"lots\": 1,\n    \"suitableForSme\": null,\n    \"suitableForVcse\": null,\n    \"deliveryRegions\": [],\n    \"deliveryRegionNames\": [],\n    \"buyerName\": \"University of South Wales\",\n    \"buyerId\": \"GB-PPON-PCWX-4677-HTMN\",\n    \"buyerType\": \"Public authority - sub-central government\",\n    \"buyerLocality\": \"Pontypridd\",\n    \"buyerPostcode\": \"CF37 1DL\",\n    \"buyerRegion\": \"UKL15\",\n    \"buyerWebsite\": null,\n    \"awardedValue\": 238688.85,\n    \"awardDate\": \"2026-11-20T00:00:00+00:00\",\n    \"suppliers\": [\n      {\n        \"name\": \"Toppers Wales Ltd\",\n        \"id\": \"GB-PPON-PPGX-1761-RVGQ\",\n        \"scale\": \"sme\"\n      }\n    ],\n    \"noticeUrl\": \"https://www.find-tender.service.gov.uk/Notice/110367-2026\",\n    \"license\": \"Contains public sector information licensed under the Open Government Licence v3.0 (Find a Tender / Contracts Finder, Cabinet Office). https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/\",\n    \"fetchedAt\": \"2026-11-22T06:41:58.706Z\"\n  },\n  {\n    \"type\": \"notice\",\n    \"source\": \"find-a-tender\",\n    \"noticeId\": \"110365-2026\",\n    \"releaseId\": \"110365-2026\",\n    \"ocid\": \"ocds-h6vhtk-06a565\",\n    \"noticeType\": \"award\",\n    \"ocdsTags\": [\n      \"award\",\n      \"contract\"\n    ],\n    \"noticeForm\": \"UK6\",\n    \"noticeFormName\": \"Contract award notice\",\n    \"publishedAt\": \"2026-11-20T18:24:57Z\",\n    \"title\": \"Care Home Brokerage Services\",\n    \"description\": \"Care Home Brokerage Services to support effective discharge from hospital to intermediate care on behalf of The Dudley Group NHS Foundation Trust.\\nThe initial contract period is estimated to be 01/10/2026 to 30/09/2029 with the option to extend for up to 2 further years.\",\n    \"status\": \"complete\",\n    \"mainCategory\": null,\n    \"procedure\": \"Open procedure\",\n    \"legalBasis\": \"Procurement Act 2023\",\n    \"aboveThreshold\": null,\n    \"frameworkAgreement\": null,\n    \"mainCpv\": \"75122000\",\n    \"mainCpvDescription\": null,\n    \"cpvCodes\": [\n      \"75122000\"\n    ],\n    \"estimatedValue\": null,\n    \"estimatedValueInclVat\": null,\n    \"minimumValue\": null,\n    \"currency\": \"GBP\",\n    \"submissionDeadline\": null,\n    \"expressionOfInterestDeadline\": null,\n    \"enquiryDeadline\": null,\n    \"contractStart\": null,\n    \"contractEnd\": null,\n    \"lots\": 1,\n    \"suitableForSme\": null,\n    \"suitableForVcse\": null,\n    \"deliveryRegions\": [],\n    \"deliveryRegionNames\": [],\n    \"buyerName\": \"The Dudley Group NHS Foundation Trust\",\n    \"buyerId\": \"GB-PPON-PRGP-5218-PVYD\",\n    \"buyerType\": \"Public authority - central government\",\n    \"buyerLocality\": \"Dudley\",\n    \"buyerPostcode\": \"DY1 2HQ\",\n    \"buyerRegion\": \"UKG36\",\n    \"buyerWebsite\": \"https://www.dgft.nhs.uk/\",\n    \"awardedValue\": 900000,\n    \"awardDate\": \"2026-11-20T00:00:00Z\",\n    \"suppliers\": [\n      {\n        \"name\": \"How to Find a Care Home\",\n        \"id\": \"GB-PPON-PTND-4335-LZDP\",\n        \"scale\": \"sme\"\n      }\n    ],\n    \"noticeUrl\": \"https://www.find-tender.service.gov.uk/Notice/110365-2026\",\n    \"license\": \"Contains public sector information licensed under the Open Government Licence v3.0 (Find a Tender / Contracts Finder, Cabinet Office). https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/\",\n    \"fetchedAt\": \"2026-11-22T06:41:58.706Z\"\n  },\n  {\n    \"type\": \"summary\",\n    \"windowFrom\": \"2026-11-19T06:41:58.000Z\",\n    \"windowTo\": \"2026-11-22T06:41:58.000Z\",\n    \"scanned\": 1102,\n    \"matched\": 869,\n    \"skippedSeen\": 15,\n    \"duplicates\": 0,\n    \"crossSourceDuplicates\": 6,\n    \"charged\": 15,\n    \"rejected\": {\n      \"noticeType\": 231,\n      \"closed\": 2\n    },\n    \"stoppedBy\": \"max_items\",\n    \"moreAvailable\": true,\n    \"seenPruned\": 0,\n    \"gap\": null,\n    \"sources\": {\n      \"find-a-tender\": {\n        \"pages\": 9,\n        \"releases\": 866,\n        \"matched\": 658,\n        \"ok\": true\n      },\n      \"contracts-finder\": {\n        \"pages\": 3,\n        \"releases\": 236,\n        \"matched\": 211,\n        \"ok\": true\n      }\n    },\n    \"errors\": [],\n    \"warnings\": [],\n    \"failedLoudly\": false,\n    \"days\": 3,\n    \"filters\": {\n      \"sources\": [\n        \"contracts-finder\",\n        \"find-a-tender\"\n      ],\n      \"noticeTypes\": [\n        \"award\",\n        \"opportunity\"\n      ],\n      \"cpvPrefixes\": [],\n      \"regions\": [],\n      \"keywords\": [],\n      \"excludeKeywords\": [],\n      \"buyerNameContains\": [],\n      \"minValueGbp\": null,\n      \"maxValueGbp\": null,\n      \"includeUnknownValue\": true,\n      \"includeUnknownRegion\": true,\n      \"openOnly\": true,\n      \"smeSuitableOnly\": false\n    },\n    \"license\": \"Contains public sector information licensed under the Open Government Licence v3.0 (Find a Tender / Contracts Finder, Cabinet Office). https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/\"\n  }\n];\nreturn rows.map((json) => ({ json }));"
+      },
+      "id": "ukt-006-829d560f",
+      "name": "Mock Actor output (free, no Apify call)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "apifyApi",
+        "resource": "Actors",
+        "operation": "Run actor and get dataset",
+        "actorSource": "store",
+        "actorId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "a2lVfWUOdjJjU9DwO"
+        },
+        "actorInputMode": "json",
+        "customBody": "={{ JSON.stringify($json.actorInput) }}",
+        "timeout": 600,
+        "memory": 256,
+        "maxTotalChargeUsd": "={{ $json.maxTotalChargeUsd }}",
+        "build": ""
+      },
+      "id": "ukt-007-707215f6",
+      "name": "Run UK Public Tenders Feed",
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 2,
+      "position": [
+        960,
+        480
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": false,
+      "notes": "asunoki/uk-public-tenders-feed (pay per event, $0.004 per new notice). Select your Apify API credential. If the run fails, the error item continues to the digest so you are told."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code-node logic for the \"UK tenders daily digest\" n8n workflow.\n// build.mjs inlines these functions into the Code nodes, so the unit-tested code is the code in workflow.json.\n// Keep this file free of imports: n8n Code nodes run it as plain JavaScript.\n\nconst NOTICE_PRICE_USD = 0.004; // asunoki/uk-public-tenders-feed, event \"notice\" (check the Actor's Pricing tab)\nconst START_FEE_USD = 0.00005; // Apify run-start event at 256 MB\n\nfunction splitList(value) {\n  if (Array.isArray(value)) return value.map((v) => String(v).trim()).filter(Boolean);\n  return String(value ?? '').split(',').map((v) => v.trim()).filter(Boolean);\n}\n\nfunction toInt(value, fallback, min, max) {\n  const n = Number(value);\n  if (!Number.isFinite(n) || String(value ?? '').trim() === '') return fallback;\n  return Math.min(max, Math.max(min, Math.round(n)));\n}\n\n/** Settings node -> Actor input, cost estimate and spend cap. */\nfunction buildActorInput(s) {\n  const types = splitList(s.noticeTypes);\n  const input = {\n    noticeTypes: types.length ? types : ['opportunity'],\n    cpvPrefixes: splitList(s.cpvPrefixes),\n    keywords: splitList(s.keywords),\n    excludeKeywords: splitList(s.excludeKeywords),\n    regions: splitList(s.regions).map((r) => r.toUpperCase()),\n    days: toInt(s.days, 3, 1, 30),\n    onlyNew: true,\n    openOnly: true,\n    maxItems: toInt(s.maxItems, 100, 1, 10000),\n  };\n  for (const t of input.noticeTypes) {\n    if (!['opportunity', 'planning', 'award', 'update'].includes(t)) throw new Error(`Notice type \"${t}\" must be opportunity, planning, award or update.`);\n  }\n  for (const c of input.cpvPrefixes) {\n    if (!/^\\d{2,8}$/.test(c)) throw new Error(`CPV prefix \"${c}\" must be 2 to 8 digits.`);\n  }\n  if (Number(s.minValueGbp) > 0) input.minValueGbp = Math.round(Number(s.minValueGbp));\n  if (s.stateStoreName) input.stateStoreName = String(s.stateStoreName);\n  for (const k of ['cpvPrefixes', 'keywords', 'excludeKeywords', 'regions']) if (!input[k].length) delete input[k];\n  const estimateUsd = Math.round((input.maxItems * NOTICE_PRICE_USD + START_FEE_USD) * 1e6) / 1e6;\n  const cap = Number(s.maxTotalChargeUsd) > 0 ? Number(s.maxTotalChargeUsd) : estimateUsd;\n  return {\n    actorInput: input,\n    maxTotalChargeUsd: cap,\n    estimateUsd,\n    estimateText: `Max cost of this run: $${estimateUsd.toFixed(2)} (${input.maxItems} notices x $${NOTICE_PRICE_USD} + start fee); spend cap $${cap.toFixed(2)}. Filtered-out and already-seen notices are free.`,\n  };\n}\n\nfunction esc(t) {\n  return String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\n}\n\nfunction money(n, cur) {\n  if (n == null || n === '') return 'value not published';\n  return `${cur || 'GBP'} ${Math.round(Number(n)).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',')}`;\n}\n\nfunction day(iso) {\n  return iso ? String(iso).slice(0, 10) : 'n/a';\n}\n\n/** Actor dataset items (plus an error item if the run failed) -> Slack text and HTML digest. */\nfunction buildDigest(items, settings, plan) {\n  const error = items.find((i) => i && i.error);\n  const notices = items.filter((i) => i && i.type === 'notice');\n  const summaries = items.filter((i) => i && i.type === 'summary');\n  const summary = summaries.length ? summaries[summaries.length - 1] : null;\n  notices.sort((a, b) => String(a.submissionDeadline || '9999').localeCompare(String(b.submissionDeadline || '9999')));\n  const maxLines = toInt(settings.maxLinesInDigest, 15, 1, 100);\n  const title = settings.digestTitle || 'New UK public tenders';\n  const charged = summary && Number.isFinite(summary.charged) ? summary.charged : notices.length;\n  const costLine = `Cost: ${charged} notice(s) charged x $${NOTICE_PRICE_USD}, about $${(charged * NOTICE_PRICE_USD + START_FEE_USD).toFixed(3)} with the start fee`;\n\n  const lines = notices.slice(0, maxLines).map((n) => `• <${n.noticeUrl}|${esc(n.title)}>\\n   ${esc(n.buyerName)} | ${money(n.estimatedValue, n.currency)} | deadline ${day(n.submissionDeadline)} | CPV ${n.mainCpv || 'n/a'}`);\n  if (notices.length > maxLines) lines.push(`…and ${notices.length - maxLines} more in the Apify dataset.`);\n  const errText = error ? (error.error && error.error.message) || error.message || String(error.error) : '';\n  const parts = [`*${esc(title)}*: ${notices.length} new notice(s)`];\n  if (error) parts.push(`:warning: The Actor run failed: ${esc(errText)}`);\n  if (summary && summary.moreAvailable) parts.push('More notices matched than maxItems allowed; they stay new for the next run.');\n  parts.push(...lines);\n  parts.push(`_${costLine}._`);\n\n  const rows = notices.slice(0, maxLines).map((n) => `<tr><td><a href=\"${esc(n.noticeUrl)}\">${esc(n.title)}</a></td><td>${esc(n.buyerName)}</td><td>${esc(money(n.estimatedValue, n.currency))}</td><td>${esc(day(n.submissionDeadline))}</td></tr>`).join('');\n  return {\n    count: notices.length,\n    failed: Boolean(error),\n    shouldSend: notices.length > 0 || Boolean(error),\n    text: parts.join('\\n'),\n    html: `<h3>${esc(title)}: ${notices.length} new notice(s)</h3>${error ? '<p><b>The Actor run failed.</b></p>' : ''}<table border=\"1\" cellpadding=\"4\" cellspacing=\"0\"><tr><th>Notice</th><th>Buyer</th><th>Value</th><th>Deadline</th></tr>${rows}</table><p><small>${esc(costLine)}. ${plan ? esc(plan.estimateText) : ''} Contains public sector information licensed under the Open Government Licence v3.0.</small></p>`,\n    summary,\n  };\n}\n\nconst items = $input.all().map((i) => i.json);\nconst digest = buildDigest(items, $('Settings').first().json, $('Build Actor input').first().json);\nreturn [{ json: digest }];"
+      },
+      "id": "ukt-008-c7cbec43",
+      "name": "Build digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        380
+      ],
+      "notes": "Drops the free summary row, sorts by deadline, builds Slack text (digest.text) and HTML (digest.html)."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ukt-if-11023272",
+              "leftValue": "={{ $json.shouldSend }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ukt-009-11023272",
+      "name": "Anything to send?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ukt-if-70106d90",
+              "leftValue": "={{ $('Settings').first().json.slackEnabled }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ukt-010-70106d90",
+      "name": "Slack enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Settings').first().json.slackChannel.replace(/^#/, '') }}"
+        },
+        "messageType": "text",
+        "text": "={{ $('Build digest').first().json.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "ukt-011-4c62bd89",
+      "name": "Send to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1920,
+        180
+      ],
+      "notes": "Select your Slack credential. To e-mail instead, replace this node with Send Email and use digest.html."
+    },
+    {
+      "parameters": {},
+      "id": "ukt-012-92e576f4",
+      "name": "Slack is off (read Build digest)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        380
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "ukt-013-62c23e71",
+      "name": "Nothing new",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### UK public tenders: daily digest\nRuns the **UK Public Tenders Feed** Actor (asunoki/uk-public-tenders-feed on Apify) every weekday morning and posts the **new** notices for your CPV codes, regions and minimum value to Slack. Find a Tender + Contracts Finder, official APIs, Open Government Licence v3.0.\n\n**Setup**\n1. Install the Apify community node (@apify/n8n-nodes-apify) and create an **Apify API** credential; select it on *Run UK Public Tenders Feed*.\n2. Edit **Settings** (CPV codes, regions, min value, days, maxItems).\n3. Free test first: keep useMockData = true, click *Run now*, read the output of *Build digest*. No Apify call, nothing sent.\n4. Set useMockData = false, run once. Then set slackEnabled = true, select a Slack credential on *Send to Slack*, and enable the schedule.\n\nOnly new notices are returned on each run (the Actor remembers what it returned for the same filters).",
+        "height": 560,
+        "width": 700,
+        "color": 4
+      },
+      "id": "ukt-014-0efc2e6b",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Cost\nPay per event: **$0.004 per new notice stored** + $0.00005 run start. Filtered-out and already-seen notices are free.\n- maxItems 100 = at most about $0.40 a run.\n- A niche (one CPV group + region) is typically 0 to 20 new notices a day: under $0.10 a day.\n- All UK open opportunities: about 85 a working day, about $0.35 a day.\nThe spend cap (maxTotalChargeUsd) is sent with every run; 0 in Settings means \"use the maxItems estimate\".",
+        "height": 300,
+        "width": 520,
+        "color": 6
+      },
+      "id": "ukt-015-64ae43e8",
+      "name": "Cost",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -320
+      ]
+    }
+  ],
+  "connections": {
+    "Run now": {
+      "main": [
+        [
+          {
+            "node": "Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekdays 07:30 (enable after a test run)": {
+      "main": [
+        [
+          {
+            "node": "Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Settings": {
+      "main": [
+        [
+          {
+            "node": "Build Actor input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Actor input": {
+      "main": [
+        [
+          {
+            "node": "Use mock data?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use mock data?": {
+      "main": [
+        [
+          {
+            "node": "Mock Actor output (free, no Apify call)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Run UK Public Tenders Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock Actor output (free, no Apify call)": {
+      "main": [
+        [
+          {
+            "node": "Build digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run UK Public Tenders Feed": {
+      "main": [
+        [
+          {
+            "node": "Build digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build digest": {
+      "main": [
+        [
+          {
+            "node": "Anything to send?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything to send?": {
+      "main": [
+        [
+          {
+            "node": "Slack enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nothing new",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack enabled?": {
+      "main": [
+        [
+          {
+            "node": "Send to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack is off (read Build digest)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

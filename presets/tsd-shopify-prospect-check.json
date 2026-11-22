@@ -1,0 +1,19 @@
+{
+  "id": "tsd-shopify-prospect-check",
+  "actor": "tech-stack-detector",
+  "title": "Check a prospect list: which stores run Shopify, which theme and storefront apps",
+  "who": "Shopify agencies and app vendors qualifying a list of store domains.",
+  "schedule": "on demand, or monthly on the same list",
+  "input": {
+    "urls": [
+      "colourpop.com",
+      "tentree.com",
+      "beardbrand.com"
+    ],
+    "ecommerceSignals": true,
+    "minConfidence": 65,
+    "includeEvidence": false,
+    "includeDns": true
+  },
+  "notes": "Replace urls with your own list (or pass --urls-file domains.txt). Cost is per website scanned successfully; blocked or failed sites are free."
+}

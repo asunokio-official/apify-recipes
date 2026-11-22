@@ -1,0 +1,12 @@
+{
+  "id": "three-cities-100k-plus",
+  "actor": "us-building-permits-feed",
+  "title": "Projects of $100,000 or more in San Francisco, Austin and New Orleans",
+  "who": "Building-material suppliers, subcontractors and construction analysts looking for larger projects.",
+  "schedule": "weekly",
+  "input": {
+    "minValueUsd": 100000,
+    "lookbackDays": 7,
+    "maxItems": 500
+  }
+}

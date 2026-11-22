@@ -1,0 +1,246 @@
+{
+  "note": "Real rows from a local run on 2026-11-22 (award notices shown). Contains public sector information licensed under the Open Government Licence v3.0.",
+  "rows": [
+    {
+      "type": "notice",
+      "source": "contracts-finder",
+      "noticeId": "d991582b-b97f-48c9-a726-a12bba6aa933",
+      "releaseId": "d991582b-b97f-48c9-a726-a12bba6aa933-922252",
+      "ocid": "ocds-b5fd17-48db6cd2-cabf-4498-8255-a1635c8180e6",
+      "noticeType": "award",
+      "ocdsTags": [
+        "award"
+      ],
+      "noticeForm": null,
+      "noticeFormName": null,
+      "publishedAt": "2026-11-20T20:21:31Z",
+      "title": "Provision of Laptops",
+      "description": "To provide up to a maximum of 200 Laptops.\n\nUnder the Health Trust Europe Framework - ICT Solutions 3.",
+      "status": "complete",
+      "mainCategory": "goods",
+      "procedure": "Call-off from a framework agreement",
+      "legalBasis": null,
+      "aboveThreshold": null,
+      "frameworkAgreement": null,
+      "mainCpv": "30213100",
+      "mainCpvDescription": "Portable computers",
+      "cpvCodes": [
+        "30213100"
+      ],
+      "estimatedValue": 241000,
+      "estimatedValueInclVat": null,
+      "minimumValue": null,
+      "currency": "GBP",
+      "submissionDeadline": "2026-10-12T17:00:00+01:00",
+      "expressionOfInterestDeadline": null,
+      "enquiryDeadline": null,
+      "contractStart": "2026-10-21T00:00:00+01:00",
+      "contractEnd": "2027-10-20T23:59:59+01:00",
+      "lots": null,
+      "suitableForSme": false,
+      "suitableForVcse": false,
+      "deliveryRegions": [],
+      "deliveryRegionNames": [],
+      "buyerName": "Nursing And Midwifery Council",
+      "buyerId": "GB-SRS-sid4gov.cabinetoffice.gov.uk/FxGd77hQ",
+      "buyerType": null,
+      "buyerLocality": "LONDON",
+      "buyerPostcode": "W1B1PZ",
+      "buyerRegion": null,
+      "buyerWebsite": null,
+      "awardedValue": 241000,
+      "awardDate": "2026-10-19T00:00:00+01:00",
+      "suppliers": [
+        {
+          "name": "CDW UK",
+          "id": "GB-COH-02465350",
+          "scale": "large"
+        }
+      ],
+      "noticeUrl": "https://www.contractsfinder.service.gov.uk/Notice/d991582b-b97f-48c9-a726-a12bba6aa933",
+      "license": "Contains public sector information licensed under the Open Government Licence v3.0 (Find a Tender / Contracts Finder, Cabinet Office). https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+      "fetchedAt": "2026-11-22T06:41:58.706Z"
+    },
+    {
+      "type": "notice",
+      "source": "find-a-tender",
+      "noticeId": "110367-2026",
+      "releaseId": "110367-2026",
+      "ocid": "ocds-h6vhtk-06f366",
+      "noticeType": "award",
+      "ocdsTags": [
+        "award",
+        "contract"
+      ],
+      "noticeForm": "UK6",
+      "noticeFormName": "Contract award notice",
+      "publishedAt": "2026-11-20T19:18:39Z",
+      "title": "Supply of Sports Kit to USW",
+      "description": "The University of South Wales is seeking to appoint a supplier for the supply, branding, personalisation and delivery of sports kit and associated clothing. The contract covers sports kit requirements for University students, academic staff and operational staff.",
+      "status": "complete",
+      "mainCategory": null,
+      "procedure": "Open procedure",
+      "legalBasis": "Procurement Act 2023",
+      "aboveThreshold": null,
+      "frameworkAgreement": null,
+      "mainCpv": "18412000",
+      "mainCpvDescription": null,
+      "cpvCodes": [
+        "18412000"
+      ],
+      "estimatedValue": null,
+      "estimatedValueInclVat": null,
+      "minimumValue": null,
+      "currency": "GBP",
+      "submissionDeadline": null,
+      "expressionOfInterestDeadline": null,
+      "enquiryDeadline": null,
+      "contractStart": null,
+      "contractEnd": null,
+      "lots": 1,
+      "suitableForSme": null,
+      "suitableForVcse": null,
+      "deliveryRegions": [],
+      "deliveryRegionNames": [],
+      "buyerName": "University of South Wales",
+      "buyerId": "GB-PPON-PCWX-4677-HTMN",
+      "buyerType": "Public authority - sub-central government",
+      "buyerLocality": "Pontypridd",
+      "buyerPostcode": "CF37 1DL",
+      "buyerRegion": "UKL15",
+      "buyerWebsite": null,
+      "awardedValue": 238688.85,
+      "awardDate": "2026-11-20T00:00:00+00:00",
+      "suppliers": [
+        {
+          "name": "Toppers Wales Ltd",
+          "id": "GB-PPON-PPGX-1761-RVGQ",
+          "scale": "sme"
+        }
+      ],
+      "noticeUrl": "https://www.find-tender.service.gov.uk/Notice/110367-2026",
+      "license": "Contains public sector information licensed under the Open Government Licence v3.0 (Find a Tender / Contracts Finder, Cabinet Office). https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+      "fetchedAt": "2026-11-22T06:41:58.706Z"
+    },
+    {
+      "type": "notice",
+      "source": "find-a-tender",
+      "noticeId": "110365-2026",
+      "releaseId": "110365-2026",
+      "ocid": "ocds-h6vhtk-06a565",
+      "noticeType": "award",
+      "ocdsTags": [
+        "award",
+        "contract"
+      ],
+      "noticeForm": "UK6",
+      "noticeFormName": "Contract award notice",
+      "publishedAt": "2026-11-20T18:24:57Z",
+      "title": "Care Home Brokerage Services",
+      "description": "Care Home Brokerage Services to support effective discharge from hospital to intermediate care on behalf of The Dudley Group NHS Foundation Trust.\nThe initial contract period is estimated to be 01/10/2026 to 30/09/2029 with the option to extend for up to 2 further years.",
+      "status": "complete",
+      "mainCategory": null,
+      "procedure": "Open procedure",
+      "legalBasis": "Procurement Act 2023",
+      "aboveThreshold": null,
+      "frameworkAgreement": null,
+      "mainCpv": "75122000",
+      "mainCpvDescription": null,
+      "cpvCodes": [
+        "75122000"
+      ],
+      "estimatedValue": null,
+      "estimatedValueInclVat": null,
+      "minimumValue": null,
+      "currency": "GBP",
+      "submissionDeadline": null,
+      "expressionOfInterestDeadline": null,
+      "enquiryDeadline": null,
+      "contractStart": null,
+      "contractEnd": null,
+      "lots": 1,
+      "suitableForSme": null,
+      "suitableForVcse": null,
+      "deliveryRegions": [],
+      "deliveryRegionNames": [],
+      "buyerName": "The Dudley Group NHS Foundation Trust",
+      "buyerId": "GB-PPON-PRGP-5218-PVYD",
+      "buyerType": "Public authority - central government",
+      "buyerLocality": "Dudley",
+      "buyerPostcode": "DY1 2HQ",
+      "buyerRegion": "UKG36",
+      "buyerWebsite": "https://www.dgft.nhs.uk/",
+      "awardedValue": 900000,
+      "awardDate": "2026-11-20T00:00:00Z",
+      "suppliers": [
+        {
+          "name": "How to Find a Care Home",
+          "id": "GB-PPON-PTND-4335-LZDP",
+          "scale": "sme"
+        }
+      ],
+      "noticeUrl": "https://www.find-tender.service.gov.uk/Notice/110365-2026",
+      "license": "Contains public sector information licensed under the Open Government Licence v3.0 (Find a Tender / Contracts Finder, Cabinet Office). https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+      "fetchedAt": "2026-11-22T06:41:58.706Z"
+    },
+    {
+      "type": "summary",
+      "windowFrom": "2026-11-19T06:41:58.000Z",
+      "windowTo": "2026-11-22T06:41:58.000Z",
+      "scanned": 1102,
+      "matched": 869,
+      "skippedSeen": 15,
+      "duplicates": 0,
+      "crossSourceDuplicates": 6,
+      "charged": 15,
+      "rejected": {
+        "noticeType": 231,
+        "closed": 2
+      },
+      "stoppedBy": "max_items",
+      "moreAvailable": true,
+      "seenPruned": 0,
+      "gap": null,
+      "sources": {
+        "find-a-tender": {
+          "pages": 9,
+          "releases": 866,
+          "matched": 658,
+          "ok": true
+        },
+        "contracts-finder": {
+          "pages": 3,
+          "releases": 236,
+          "matched": 211,
+          "ok": true
+        }
+      },
+      "errors": [],
+      "warnings": [],
+      "failedLoudly": false,
+      "days": 3,
+      "filters": {
+        "sources": [
+          "contracts-finder",
+          "find-a-tender"
+        ],
+        "noticeTypes": [
+          "award",
+          "opportunity"
+        ],
+        "cpvPrefixes": [],
+        "regions": [],
+        "keywords": [],
+        "excludeKeywords": [],
+        "buyerNameContains": [],
+        "minValueGbp": null,
+        "maxValueGbp": null,
+        "includeUnknownValue": true,
+        "includeUnknownRegion": true,
+        "openOnly": true,
+        "smeSuitableOnly": false
+      },
+      "license": "Contains public sector information licensed under the Open Government Licence v3.0 (Find a Tender / Contracts Finder, Cabinet Office). https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+    }
+  ]
+}

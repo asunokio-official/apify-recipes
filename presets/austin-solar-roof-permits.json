@@ -1,0 +1,21 @@
+{
+  "id": "austin-solar-roof-permits",
+  "actor": "us-building-permits-feed",
+  "title": "New solar and roofing permits in Austin, TX",
+  "who": "Solar installers, roofers and suppliers who track local demand and competitors' activity.",
+  "schedule": "daily or weekly (use lookbackDays 7 for weekly)",
+  "input": {
+    "cities": [
+      "austin"
+    ],
+    "keywords": [
+      "solar",
+      "photovoltaic",
+      "roof"
+    ],
+    "lookbackDays": 7,
+    "onlyNew": true,
+    "maxItems": 300
+  },
+  "notes": "Keywords match the description, permit type and work type. Austin records 0 as the value for some trades, so no minimum value is set."
+}

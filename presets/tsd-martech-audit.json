@@ -1,0 +1,19 @@
+{
+  "id": "tsd-martech-audit",
+  "actor": "tech-stack-detector",
+  "title": "Analytics, tag manager and consent audit for a list of sites, with evidence",
+  "who": "Agencies auditing client or competitor sites before a pitch.",
+  "schedule": "on demand",
+  "input": {
+    "urls": [
+      "python.org",
+      "woocommerce.com"
+    ],
+    "includeEvidence": true,
+    "minConfidence": 65,
+    "expectedTechnologies": [
+      "Google Tag Manager"
+    ]
+  },
+  "notes": "expectedTechnologies adds a pass/fail column per site."
+}

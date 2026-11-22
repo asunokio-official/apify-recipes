@@ -1,0 +1,19 @@
+{
+  "title": "US Building Permits Feed",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "cities": { "title": "Cities", "type": "array", "editor": "select", "items": { "type": "string", "enum": ["san-francisco", "austin", "new-orleans"], "enumTitles": ["San Francisco, CA", "Austin, TX", "New Orleans, LA"] }, "description": "Leave empty for all three cities. Each city is read from its own official open-data portal.", "prefill": ["austin", "san-francisco"] },
+    "keywords": { "title": "Keywords (permit type, work type or description)", "type": "array", "editor": "stringList", "description": "A permit matches if any keyword appears, e.g. \"solar\", \"roof\", \"ADU\", \"demolition\", \"pool\". Leave empty for all permits.", "prefill": ["solar", "roof"] },
+    "permitTypeContains": { "title": "Permit type contains", "type": "array", "editor": "stringList", "description": "Text in the permit type or work type, e.g. \"electrical\", \"plumbing\", \"new construction\"." },
+    "minValueUsd": { "title": "Minimum project value (USD)", "type": "number", "minimum": 0, "description": "Skips permits whose declared value is below this or missing. Declared values are what the applicant reported; some cities use placeholders like 1." },
+    "zipCodes": { "title": "ZIP codes", "type": "array", "editor": "stringList", "description": "5-digit ZIP codes. New Orleans does not publish a ZIP, so those permits are excluded when this is set." },
+    "lookbackDays": { "title": "Days back (issue date)", "type": "integer", "minimum": 1, "maximum": 31, "default": 7, "description": "Portals publish with a lag of about 1 to 3 days. With \"only new\" on and a daily schedule, a 7-day window repeats nothing and catches every permit the city publishes within 7 days of its issue date." },
+    "onlyNew": { "title": "Only permits not output before (for schedules)", "type": "boolean", "default": true, "description": "Remembered per filter set in a named key-value store. Turn off to get the whole window every time." },
+    "includeDescription": { "title": "Include the work description", "type": "boolean", "default": true, "description": "Free text from the permit, shortened to 800 characters. E-mail addresses and phone numbers typed into it are replaced by a marker." },
+    "includeContractorCompany": { "title": "Include the contractor company name", "type": "boolean", "default": true, "description": "Austin and New Orleans only. A name is output only if it contains a business word (LLC, Inc, Roofing, ...); other names are dropped. This is a heuristic: a sole trader whose trade name has such a word can pass." },
+    "maxItems": { "title": "Max permits per run", "type": "integer", "minimum": 1, "maximum": 5000, "default": 200, "description": "You are charged per permit stored (plus Apify's small per-run start fee), so this caps the cost of a run. Permits cut by the limit stay new for the next run while they are still inside the window." },
+    "socrataAppToken": { "title": "Socrata app token (optional)", "type": "string", "editor": "textfield", "isSecret": true, "description": "Not needed. If the portals throttle you at high volume, a free token from the portal raises the limit." },
+    "stateStoreName": { "title": "State store name (advanced)", "type": "string", "editor": "textfield", "description": "Leave empty to use the default." }
+  }
+}

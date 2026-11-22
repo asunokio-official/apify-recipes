@@ -1,0 +1,89 @@
+# Weekly feed: runs one preset on Apify, uploads the CSV as an artifact and (optionally) posts a Slack digest.
+#
+# Setup (in your fork or copy of this repository):
+#   1. Settings > Secrets and variables > Actions > Secrets:
+#        APIFY_TOKEN        your Apify API token (required for real runs; without it the job does a free dry run)
+#        SLACK_WEBHOOK_URL  optional Slack incoming-webhook URL
+#   2. Settings > Secrets and variables > Actions > Variables:
+#        RECIPE_PRESET            preset id, e.g. uk-it-tenders-100k-weekly (see presets/)
+#        RECIPE_MAX_COST_USD      optional spend cap per run, e.g. 0.50
+#        RECIPE_SCHEDULE_ENABLED  set to true to let the weekly schedule run (manual runs always work)
+#
+# Cost: you pay Apify per row stored (pay per event), never for GitHub minutes on public repos.
+#   uk-it-tenders-100k-weekly   at most 300 x $0.004 = $1.20 per run; a typical week is far below the cap
+#   tx-dental-new-npis-weekly   at most 300 x $0.002 = $0.60 per run
+#   austin-solar-roof-permits   at most 300 x $0.002 = $0.60 per run
+# The run is started with maxTotalChargeUsd = the estimate (or RECIPE_MAX_COST_USD), so it cannot cost more.
+# Rows you already received are not returned or charged again (the Actors remember them per filter set).
+name: Weekly feed
+
+on:
+  schedule:
+    - cron: "17 7 * * 2" # Tuesdays 07:17 UTC: after the CMS weekly NPI file and a full week of tenders/permits
+  workflow_dispatch:
+    inputs:
+      preset:
+        description: "Preset id (see presets/). Empty = repository variable RECIPE_PRESET"
+        required: false
+        default: ""
+      max_cost_usd:
+        description: "Spend cap in USD for this run. Empty = estimate from maxItems"
+        required: false
+        default: ""
+      dry_run:
+        description: "Dry run: do not contact Apify, use sample rows"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-feed
+  cancel-in-progress: false
+
+jobs:
+  feed:
+    if: github.event_name == 'workflow_dispatch' || vars.RECIPE_SCHEDULE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PRESET: ${{ inputs.preset || vars.RECIPE_PRESET || 'uk-it-tenders-100k-weekly' }}
+      MAX_COST_USD: ${{ inputs.max_cost_usd || vars.RECIPE_MAX_COST_USD || '' }}
+      FORCE_DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: node/package-lock.json
+      - name: Install
+        working-directory: node
+        run: npm ci --no-audit --no-fund
+      - name: Run preset
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          set -euo pipefail
+          if ! printf '%s' "$PRESET" | grep -Eq '^[a-z0-9][a-z0-9-]{0,80}$'; then echo "Invalid preset id"; exit 1; fi
+          mkdir -p out
+          args=(run "$PRESET" --out "out/$PRESET.csv" --json "out/$PRESET.json")
+          if [ -z "${APIFY_TOKEN:-}" ] || [ "$FORCE_DRY_RUN" = "true" ]; then
+            echo "::notice::Dry run (no APIFY_TOKEN secret or dry_run requested): Apify is not contacted."
+            args+=(--dry-run)
+          else
+            args+=(--yes)
+          fi
+          if [ -n "$MAX_COST_USD" ]; then args+=(--max-cost "$MAX_COST_USD"); fi
+          if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then args+=(--slack); fi
+          node node/src/cli.js "${args[@]}"
+      - name: Upload CSV
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PRESET }}-${{ github.run_number }}
+          path: out/
+          if-no-files-found: warn
+          retention-days: 30

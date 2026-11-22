@@ -1,0 +1,21 @@
+{
+  "id": "uk-marketing-tenders-sme",
+  "actor": "uk-public-tenders-feed",
+  "title": "UK marketing, advertising and PR tenders suitable for SMEs",
+  "who": "Small agencies bidding for public-sector marketing work.",
+  "schedule": "weekly",
+  "input": {
+    "noticeTypes": [
+      "opportunity"
+    ],
+    "cpvPrefixes": [
+      "7934",
+      "79416",
+      "79341"
+    ],
+    "smeSuitableOnly": true,
+    "days": 10,
+    "maxItems": 200
+  },
+  "notes": "CPV 7934 marketing/advertising services, 79416 public relations, 79341 advertising services."
+}

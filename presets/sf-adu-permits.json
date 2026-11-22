@@ -1,0 +1,19 @@
+{
+  "id": "sf-adu-permits",
+  "actor": "us-building-permits-feed",
+  "title": "New ADU (accessory dwelling unit) permits in San Francisco",
+  "who": "ADU builders, modular-home vendors and local real-estate analysts.",
+  "schedule": "weekly",
+  "input": {
+    "cities": [
+      "san-francisco"
+    ],
+    "keywords": [
+      "adu",
+      "accessory dwelling"
+    ],
+    "lookbackDays": 7,
+    "maxItems": 200
+  },
+  "notes": "Matching is substring-based, so 'adu' can also hit unrelated words; check the description column."
+}

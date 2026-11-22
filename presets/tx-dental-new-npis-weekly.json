@@ -1,0 +1,20 @@
+{
+  "id": "tx-dental-new-npis-weekly",
+  "actor": "nppes-new-providers-feed",
+  "title": "Weekly new NPIs in Texas for dental practices",
+  "who": "Dental supply, dental billing/RCM and practice-software sales teams who call on new dental practices.",
+  "schedule": "weekly (Tuesday or Wednesday, after CMS posts the Monday-to-Sunday file)",
+  "input": {
+    "states": [
+      "TX"
+    ],
+    "categories": [
+      "dental"
+    ],
+    "excludeSubparts": true,
+    "weeks": 2,
+    "onlyNew": true,
+    "maxItems": 300
+  },
+  "notes": "Texas gets about 770 new NPIs a week across all provider types; dental is a small share of that. maxItems caps the cost either way."
+}

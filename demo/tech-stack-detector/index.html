@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tech Stack Detector (CMS, Shopify/WooCommerce, hosting, analytics, with evidence): sample output</title>
+<meta name="description" content="Tech Stack Detector (CMS, Shopify/WooCommerce, hosting, analytics, with evidence): sample output: real sample output, input presets and cost per run.">
+<style>body{font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;color:#1d232b;background:#fafbfc}
+main{max-width:1100px;margin:0 auto;padding:28px 20px 48px}h1{font-size:1.6rem;margin:.2em 0}h2{font-size:1.15rem;margin-top:2em}
+a{color:#0b5cad}.lead{font-size:1.05rem;color:#333}.box{background:#fff;border:1px solid #dde2e8;border-radius:8px;padding:14px 18px;margin:14px 0}
+.cta{display:inline-block;background:#0b5cad;color:#fff;text-decoration:none;padding:9px 16px;border-radius:6px;font-weight:600}
+.scroll{overflow-x:auto;background:#fff;border:1px solid #dde2e8;border-radius:8px}table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 9px;border-bottom:1px solid #edf0f3;text-align:left;vertical-align:top}th{background:#f3f5f8;white-space:nowrap}
+.muted{color:#98a1ad}.ev{color:#5b6573;font-size:12px}details ul{margin:.4em 0 0;padding-left:1.1em}code,pre{font:12.5px ui-monospace,Menlo,monospace}
+pre{background:#f3f5f8;padding:10px;border-radius:6px;overflow-x:auto}.note{font-size:13px;color:#5b6573}nav a{margin-right:12px}
+footer{margin-top:40px;font-size:12.5px;color:#5b6573}</style>
+</head>
+<body><main>
+<nav><a href="../index.html">All demos</a></nav>
+<h1>Tech Stack Detector (CMS, Shopify/WooCommerce, hosting, analytics, with evidence)</h1>
+<p class="lead">For a list of websites you already have: which e-commerce platform, CMS, theme, storefront apps, CDN and analytics each one runs, with the evidence for every detection.</p>
+<p><a class="cta" href="https://apify.com/asunoki/tech-stack-detector?utm_source=github&amp;utm_medium=recipes&amp;utm_campaign=tech-stack-detector-demo">Open asunoki/tech-stack-detector on Apify</a></p>
+<div class="box"><b>Price (pay per event):</b> $0.005 per website scanned successfully (HTTP scan), $0.015 with the optional browser scan, plus a $0.00005 run-start fee. Blocked, robots-skipped and failed websites are free. Prices checked 2026-11-22; the Pricing tab on Apify is authoritative.</div>
+<h2>Real sample output</h2>
+<p class="note">Real results for 10 public websites (Actor build 0.1.22, HTTP scan with ecommerceSignals, 11 Nov 2026), the same run as the public sample report at https://asunoki.jp/ec-lab/reports/sample-store-list-1111/. Reshaped to the Actor's dataset row format; flat category columns are derived from technologies[]. Sites change, so a run today can differ.</p>
+<div class="scroll"><table><thead><tr><th>url</th><th>ecommercePlatform</th><th>ecommerce.shopifyTheme.name</th><th>ecommerce.currency.value</th><th>ecommerce.apps[].name</th><th>cms</th><th>cdn</th><th>analytics</th><th>tagManagers</th><th>technologyCount</th><th>technologies</th></tr></thead><tbody>
+<tr><td>https://woocommerce.com/</td><td>WooCommerce</td><td><span class="muted">null</span></td><td><span class="muted">null</span></td><td></td><td>WordPress</td><td></td><td></td><td></td><td>5</td><td><details><summary>5 detections</summary><ul><li><b>WooCommerce</b> (Ecommerce, 99) <span class="ev">meta generator: WooCommerce 11.4.0-dev.20261110</span></li><li><b>WordPress</b> (CMS, 99) <span class="ev">meta generator: WordPress 7.1.4</span></li><li><b>Wistia</b> (Video, 97) <span class="ev">resource: https://embed-ssl.wistia.com/deliveries/494d0b0f9be4dab33da89c9922fbc9</span></li><li><b>nginx</b> (Web server, 95) <span class="ev">header server: nginx</span></li></ul></details></td></tr>
+<tr><td>https://kyliecosmetics.com/</td><td>Shopify</td><td>KYLIE</td><td>USD</td><td>Klaviyo, Yotpo</td><td><span class="muted">null</span></td><td>Cloudflare, cdnjs, jsDelivr</td><td></td><td>Google Tag Manager</td><td>8</td><td><details><summary>8 detections</summary><ul><li><b>Cloudflare</b> (CDN, 99) <span class="ev">header cf-ray: a5895e2d5fe9e5b2-IAD</span></li><li><b>Shopify</b> (Ecommerce, 99) <span class="ev">cookie _shopify_essential: (cookie name)</span></li><li><b>Google Tag Manager</b> (Tag manager, 97) <span class="ev">resource: https://www.googletagmanager.com/gtm.js?id=</span></li><li><b>Klaviyo</b> (Marketing automation, 97) <span class="ev">resource: https://static.klaviyo.com/onsite/js/XqQ9Vp/klaviyo.js?company_id=XqQ9</span></li></ul></details></td></tr>
+<tr><td>https://colourpop.com/</td><td>Shopify</td><td>Colourpop</td><td>USD</td><td>Klaviyo, Gorgias, Yotpo, Okendo</td><td><span class="muted">null</span></td><td>Cloudflare</td><td>Microsoft Clarity</td><td>Google Tag Manager</td><td>8</td><td><details><summary>8 detections</summary><ul><li><b>Cloudflare</b> (CDN, 99) <span class="ev">header cf-ray: a5895e2d6d9d73eb-IAD</span></li><li><b>Shopify</b> (Ecommerce, 99) <span class="ev">cookie _shopify_essential: (cookie name)</span></li><li><b>Google Tag Manager</b> (Tag manager, 97) <span class="ev">resource: https://www.googletagmanager.com/gtm.js?id=</span></li><li><b>Gorgias</b> (Customer support / chat, 97) <span class="ev">resource: https://config.gorgias.chat/bundle-loader/shopify/colourpop-prd.myshop</span></li></ul></details></td></tr>
+<tr><td>https://magicspoon.com/</td><td>Shopify</td><td>magicspoon-shopify/MAIN</td><td>USD</td><td>Klaviyo, Okendo</td><td><span class="muted">null</span></td><td>Cloudflare, jsDelivr, unpkg</td><td></td><td></td><td>8</td><td><details><summary>8 detections</summary><ul><li><b>Cloudflare</b> (CDN, 99) <span class="ev">header cf-ray: a5895e2d7ab32902-IAD</span></li><li><b>jQuery</b> (JavaScript library, 99) <span class="ev">script: https://code.jquery.com/jquery-3.6.0.min.js</span></li><li><b>Shopify</b> (Ecommerce, 99) <span class="ev">cookie _shopify_essential: (cookie name)</span></li><li><b>Klaviyo</b> (Marketing automation, 97) <span class="ev">resource: https://static.klaviyo.com/onsite/js/HMWFR8/klaviyo.js?company_id=HMWF</span></li></ul></details></td></tr>
+<tr><td>https://ghostlifestyle.com/</td><td>Shopify</td><td>Ghost x Sparky Redesign</td><td>USD</td><td>Klaviyo, Gorgias</td><td><span class="muted">null</span></td><td>Cloudflare, jsDelivr</td><td></td><td></td><td>6</td><td><details><summary>6 detections</summary><ul><li><b>Cloudflare</b> (CDN, 99) <span class="ev">header cf-ray: a5895e2ebad31f57-IAD</span></li><li><b>Shopify</b> (Ecommerce, 99) <span class="ev">cookie _shopify_essential: (cookie name)</span></li><li><b>Gorgias</b> (Customer support / chat, 97) <span class="ev">resource: https://config.gorgias.chat/bundle-loader/shopify/ghost-lifestyle.mysh</span></li><li><b>Klaviyo</b> (Marketing automation, 97) <span class="ev">resource: https://static.klaviyo.com/onsite/js/XfiE2Z/klaviyo.js?company_id=XfiE</span></li></ul></details></td></tr>
+<tr><td>https://tentree.com/</td><td>Shopify</td><td>Shopify Theme Lab</td><td>USD</td><td>Klaviyo, Okendo</td><td><span class="muted">null</span></td><td>Cloudflare, jsDelivr</td><td></td><td>Google Tag Manager</td><td>10</td><td><details><summary>10 detections</summary><ul><li><b>Cloudflare</b> (CDN, 99) <span class="ev">header cf-ray: a5895e2e79b038ab-IAD</span></li><li><b>Shopify</b> (Ecommerce, 99) <span class="ev">cookie _shopify_essential: (cookie name)</span></li><li><b>Google Tag Manager</b> (Tag manager, 97) <span class="ev">resource: https://www.googletagmanager.com/gtm.js?id=</span></li><li><b>Klarna</b> (Payment, 97) <span class="ev">resource: https://js.klarna.com/web-sdk/v1/klarna.js</span></li></ul></details></td></tr>
+<tr><td>https://beardbrand.com/</td><td>Shopify</td><td>Split</td><td>USD</td><td>Klaviyo, Recharge</td><td><span class="muted">null</span></td><td>Cloudflare</td><td></td><td></td><td>7</td><td><details><summary>7 detections</summary><ul><li><b>Cloudflare</b> (CDN, 99) <span class="ev">header cf-ray: a5895e2e7f4e15e8-IAD</span></li><li><b>Shopify</b> (Ecommerce, 99) <span class="ev">cookie _shopify_essential: (cookie name)</span></li><li><b>Klaviyo</b> (Marketing automation, 97) <span class="ev">resource: https://static.klaviyo.com/onsite/js/hFArAj/klaviyo.js?company_id=hFAr</span></li><li><b>Cloudflare DNS</b> (DNS provider, 95) <span class="ev">dns_ns dns_ns: eva.ns.cloudflare.com</span></li></ul></details></td></tr>
+<tr><td>https://hauslabs.com/</td><td>Shopify</td><td>SDG Shopify Skeleton</td><td>USD</td><td>Klaviyo, Okendo</td><td><span class="muted">null</span></td><td>Cloudflare</td><td></td><td></td><td>4</td><td><details><summary>4 detections</summary><ul><li><b>Cloudflare</b> (CDN, 99) <span class="ev">header cf-ray: a5895e2f0dd91b87-IAD</span></li><li><b>Klaviyo</b> (Marketing automation, 99) <span class="ev">resource: https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=QBD6nT</span></li><li><b>Shopify</b> (Ecommerce, 99) <span class="ev">cookie _shopify_essential: (cookie name)</span></li><li><b>Google Workspace (Gmail)</b> (Email infrastructure, 95) <span class="ev">dns_mx dns_mx: aspmx.l.google.com</span></li></ul></details></td></tr>
+<tr><td>https://drinkolipop.com/</td><td>Shopify</td><td>Olipop</td><td>USD</td><td>Klaviyo</td><td><span class="muted">null</span></td><td>Cloudflare, jsDelivr</td><td>Microsoft Clarity</td><td></td><td>8</td><td><details><summary>8 detections</summary><ul><li><b>Cloudflare</b> (CDN, 99) <span class="ev">header cf-ray: a5895e2e1bd5e87f-IAD</span></li><li><b>Shopify</b> (Ecommerce, 99) <span class="ev">cookie _shopify_essential: (cookie name)</span></li><li><b>Klaviyo</b> (Marketing automation, 97) <span class="ev">resource: https://static.klaviyo.com/onsite/js/PbvgDc/klaviyo.js</span></li><li><b>Google Cloud DNS</b> (DNS provider, 95) <span class="ev">dns_ns dns_ns: ns-cloud-b2.googledomains.com</span></li></ul></details></td></tr>
+<tr><td>https://python.org/</td><td><span class="muted">null</span></td><td><span class="muted">null</span></td><td><span class="muted">null</span></td><td></td><td><span class="muted">null</span></td><td>Fastly</td><td></td><td></td><td>4</td><td><details><summary>4 detections</summary><ul><li><b>nginx</b> (Web server, 95) <span class="ev">header server: nginx</span></li><li><b>jQuery</b> (JavaScript library, 85) <span class="ev">script: https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js</span></li><li><b>Fastly</b> (CDN, 60) <span class="ev">header x-served-by: cache-iad-kcgs7200137-IAD, cache-iad-kcgs7200137-IAD, cache-iad-kcgs72</span></li><li><b>Mailgun</b> (Email service, 60) <span class="ev">dns_txt dns_txt: v=spf1 mx ip4:188.166.95.178/32 ip6:2a03:b0c0:2:d0::71:1 include:stspg</span></li></ul></details></td></tr>
+</tbody></table></div>
+
+<h2>Honest limits</h2>
+<ul><li>Checks the websites you give it; it does not find new companies or build lead lists.</li><li>Unknown means not detected, never not used: tools loaded after consent, at checkout or by inline loaders can be missed.</li><li>Blocked, robots.txt-skipped and failed websites are returned with the reason and are free; no bypass is attempted.</li></ul>
+<h2>Ready-made inputs</h2>
+<div class="box"><b>Analytics, tag manager and consent audit for a list of sites, with evidence</b><br><span class="note">For: Agencies auditing client or competitor sites before a pitch. Schedule: on demand. Max cost per run: $0.01005.</span>
+<pre>{
+  &quot;urls&quot;: [
+    &quot;python.org&quot;,
+    &quot;woocommerce.com&quot;
+  ],
+  &quot;includeEvidence&quot;: true,
+  &quot;minConfidence&quot;: 65,
+  &quot;expectedTechnologies&quot;: [
+    &quot;Google Tag Manager&quot;
+  ]
+}</pre><span class="note">Run it: <code>node node/src/cli.js run tsd-martech-audit --dry-run</code> (free preview), then with <code>APIFY_TOKEN</code> and <code>--yes</code>.</span></div>
+<div class="box"><b>Check a prospect list: which stores run Shopify, which theme and storefront apps</b><br><span class="note">For: Shopify agencies and app vendors qualifying a list of store domains. Schedule: on demand, or monthly on the same list. Max cost per run: $0.01505.</span>
+<pre>{
+  &quot;urls&quot;: [
+    &quot;colourpop.com&quot;,
+    &quot;tentree.com&quot;,
+    &quot;beardbrand.com&quot;
+  ],
+  &quot;ecommerceSignals&quot;: true,
+  &quot;minConfidence&quot;: 65,
+  &quot;includeEvidence&quot;: false,
+  &quot;includeDns&quot;: true
+}</pre><span class="note">Run it: <code>node node/src/cli.js run tsd-shopify-prospect-check --dry-run</code> (free preview), then with <code>APIFY_TOKEN</code> and <code>--yes</code>.</span></div>
+<p class="note">Public pages and public DNS only; no login, no personal data. Results of an HTTP scan on 11 Nov 2026; sites change.</p>
+<footer>Generated by scripts/build-demos.mjs in the asunoki-apify-recipes repository (MIT). Opening this page does not run anything and costs nothing. Apify is a trademark of Apify Technologies s.r.o.; this page is published by the Actor developer (ASUNOKI), not by Apify.</footer>
+</main></body>
+</html>
