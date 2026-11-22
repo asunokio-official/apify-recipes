@@ -5,6 +5,7 @@
 //   node src/cli.js run <preset> [--dry-run] [--yes] [--out file.csv] [--json file.json] [--bom]
 //                                [--all-columns] [--max-cost USD] [--input '{"states":["CA"]}']
 //                                [--urls-file domains.txt] [--slack]
+//   node src/cli.js diff <old.json> <new.json> [--out changes.csv]   technologies added/removed per site between two tech-stack-detector results (offline)
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -12,6 +13,7 @@ import { listPresets, loadCatalog, loadPreset, parseUrlList } from './catalog.js
 import { estimateCost, formatEstimate, usd } from './cost.js';
 import { allColumns, toCsv } from './csv.js';
 import { runRecipe } from './run.js';
+import { diffCsv, diffTech, rowsOf } from './diff.js';
 import { buildSlackMessage, postSlack } from './slack.js';
 
 const FLAGS = new Set(['--dry-run', '--yes', '--bom', '--all-columns', '--slack', '--help']);
@@ -45,6 +47,16 @@ export async function main(argv, env = process.env, deps = {}) {
 
   if (!cmd || args.help) {
     out(readFileSync(new URL(import.meta.url), 'utf8').split('\n').slice(1, 7).map((l) => l.replace(/^\/\/ ?/, '')).join('\n'));
+    return 0;
+  }
+  if (cmd === 'diff') {
+    const [, oldFile, newFile] = args._;
+    if (!oldFile || !newFile) throw new Error('diff needs two files: diff <old.json> <new.json>.');
+    const changes = diffTech(JSON.parse(readFileSync(oldFile, 'utf8')), JSON.parse(readFileSync(newFile, 'utf8')));
+    const compared = rowsOf(JSON.parse(readFileSync(newFile, 'utf8'))).length;
+    for (const c of changes) out(`${c.site.padEnd(34)} ${c.change.padEnd(14)} ${c.added.length ? '+ ' + c.added.join(', ') : ''} ${c.removed.length ? '- ' + c.removed.join(', ') : ''} ${c.note}`.trimEnd());
+    out(`${changes.length} of ${compared} sites differ.`);
+    if (args.out) writeFile(args.out, diffCsv(changes));
     return 0;
   }
   if (cmd === 'list') {

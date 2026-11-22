@@ -1,0 +1,13 @@
+{
+  "id": "tsd-agency-change-watch",
+  "actor": "tech-stack-detector",
+  "title": "Weekly technology snapshot of your client sites, to spot CMS, analytics and plugin changes",
+  "who": "Web agencies that manage a mix of WordPress, static and Shopify sites and want to notice when a client site changes its stack.",
+  "schedule": "weekly",
+  "input": {
+    "urls": ["python.org", "woocommerce.com"],
+    "includeEvidence": false,
+    "minConfidence": 65
+  },
+  "notes": "Run it every week with --json snapshots/YYYY-MM-DD.json, then compare two snapshots offline: node src/cli.js diff snapshots/2026-11-16.json snapshots/2026-11-23.json --out changes.csv. Replace the sample urls with your own list (--urls-file clients.txt). A site that was blocked or failed in either run is listed as not-comparable, never as 'nothing changed'."
+}

@@ -29,6 +29,7 @@ workflow, an importable n8n workflow and static sample-data pages.
 | UK marketing and PR tenders suitable for SMEs | `uk-marketing-tenders-sme` | UK Public Tenders Feed | $0.80 |
 | Which prospect stores run Shopify, which theme and apps | `tsd-shopify-prospect-check` | [Tech Stack Detector](https://apify.com/asunoki/tech-stack-detector?utm_source=github&utm_medium=recipes&utm_campaign=readme) | $0.005 per site |
 | Analytics / tag manager / consent audit with evidence | `tsd-martech-audit` | Tech Stack Detector | $0.005 per site |
+| Weekly snapshot of client sites to spot stack changes (pairs with the offline `diff` command) | `tsd-agency-change-watch` | Tech Stack Detector | $0.005 per site |
 
 "Max cost" is the `maxItems` cap times the price plus the start fee. Rows that your filters drop, and rows you already
 received in an earlier run, are free, so most runs cost far less. Each preset is a JSON file in [`presets/`](presets/)
@@ -175,3 +176,13 @@ No test uses a real token or calls the Apify API. `catalog.json` (prices, column
 ## License
 
 MIT, see [LICENSE](LICENSE). Data you obtain through the Actors stays under its source's terms (see above).
+
+## Spot technology changes between two runs (offline)
+
+```
+node node/src/cli.js run tsd-agency-change-watch --urls-file clients.txt --json snapshots/2026-11-16.json --yes
+node node/src/cli.js run tsd-agency-change-watch --urls-file clients.txt --json snapshots/2026-11-23.json --yes
+node node/src/cli.js diff snapshots/2026-11-16.json snapshots/2026-11-23.json --out changes.csv
+```
+
+`diff` lists, per site, technologies that appeared or disappeared. A site that was blocked or failed in either run shows as `not-comparable`, never as unchanged. It reads two local files and sends nothing.
