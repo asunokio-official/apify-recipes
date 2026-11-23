@@ -39,6 +39,15 @@ footer{margin-top:40px;font-size:12.5px;color:#5b6573}</style>
 <h2>Honest limits</h2>
 <ul><li>Checks the websites you give it; it does not find new companies or build lead lists.</li><li>Unknown means not detected, never not used: tools loaded after consent, at checkout or by inline loaders can be missed.</li><li>Blocked, robots.txt-skipped and failed websites are returned with the reason and are free; no bypass is attempted.</li></ul>
 <h2>Ready-made inputs</h2>
+<div class="box"><b>Weekly technology snapshot of your client sites, to spot CMS, analytics and plugin changes</b><br><span class="note">For: Web agencies that manage a mix of WordPress, static and Shopify sites and want to notice when a client site changes its stack. Schedule: weekly. Max cost per run: $0.01005.</span>
+<pre>{
+  &quot;urls&quot;: [
+    &quot;python.org&quot;,
+    &quot;woocommerce.com&quot;
+  ],
+  &quot;includeEvidence&quot;: false,
+  &quot;minConfidence&quot;: 65
+}</pre><span class="note">Run it: <code>node node/src/cli.js run tsd-agency-change-watch --dry-run</code> (free preview), then with <code>APIFY_TOKEN</code> and <code>--yes</code>.</span></div>
 <div class="box"><b>Analytics, tag manager and consent audit for a list of sites, with evidence</b><br><span class="note">For: Agencies auditing client or competitor sites before a pitch. Schedule: on demand. Max cost per run: $0.01005.</span>
 <pre>{
   &quot;urls&quot;: [
