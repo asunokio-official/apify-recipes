@@ -1,0 +1,18 @@
+{
+  "id": "tsd-email-provider-lookup",
+  "actor": "tech-stack-detector",
+  "title": "Which email provider each domain uses (Google Workspace, Microsoft 365, Zoho), from public MX/SPF",
+  "who": "IT service providers and MSPs qualifying a domain list for an email migration or security offer.",
+  "schedule": "on demand",
+  "input": {
+    "urls": [
+      "python.org",
+      "woocommerce.com"
+    ],
+    "includeDns": true,
+    "includeTls": false,
+    "includeEvidence": true,
+    "minConfidence": 0
+  },
+  "notes": "The emailInfrastructure column comes from public DNS (MX and SPF), so it works even when the homepage blocks bots. Sort the CSV by emailInfrastructure to split the list. An empty value means no known provider was matched, not that the domain has no email."
+}

@@ -30,6 +30,7 @@ workflow, an importable n8n workflow and static sample-data pages.
 | Which prospect stores run Shopify, which theme and apps | `tsd-shopify-prospect-check` | [Tech Stack Detector](https://apify.com/asunoki/tech-stack-detector?utm_source=github&utm_medium=recipes&utm_campaign=readme) | $0.005 per site |
 | Analytics / tag manager / consent audit with evidence | `tsd-martech-audit` | Tech Stack Detector | $0.005 per site |
 | Weekly snapshot of client sites to spot stack changes (pairs with the offline `diff` command) | `tsd-agency-change-watch` | Tech Stack Detector | $0.005 per site |
+| Which email provider each domain uses (Google Workspace, Microsoft 365, Zoho), from public DNS | `tsd-email-provider-lookup` | Tech Stack Detector | $0.005 per site |
 
 "Max cost" is the `maxItems` cap times the price plus the start fee. Rows that your filters drop, and rows you already
 received in an earlier run, are free, so most runs cost far less. Each preset is a JSON file in [`presets/`](presets/)
