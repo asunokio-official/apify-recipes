@@ -132,6 +132,8 @@ morning it runs the UK Public Tenders Feed with your CPV codes, regions and mini
 sorted by deadline, to Slack. It ships with a free mock mode (no Apify call), contains no credentials, and its Code-node
 logic is unit-tested. See its [README](n8n/uk-tenders-daily-digest/README.md).
 
+Also on the official n8n template library: [Monitor weekly website tech stack changes with Apify and data tables](https://n8n.io/workflows/23357). It scans your domain list weekly with Tech Stack Detector ($0.005 per successfully scanned site, with a monthly budget guard) and outputs a CSV of only the changes.
+
 ## Sample-data pages
 
 [`demo/`](demo/) holds static HTML pages, one per Actor, built from real sample output by
