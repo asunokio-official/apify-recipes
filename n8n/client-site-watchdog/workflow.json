@@ -1,0 +1,1231 @@
+{
+  "name": "Monitor client websites for DNS, domain expiry and technology changes (Apify)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "csw-001-2af00e23",
+      "name": "Run now",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "id": "csw-002-7a0fc8ab",
+      "name": "Every day 07:00 (enable after a test run)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        540
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "csw-set-93df1461",
+              "name": "clients",
+              "value": "# One line per site:  Client name | domain   (the client name is optional; lines starting with # are ignored)\n# These are fictional .example domains used by the free test mode. Replace them with your clients' domains.\nAcme Bakery | acme-bakery.example\nAcme Bakery | shop.acme-bakery.example\nNorthwind Dental | northwind-dental.example\nBlue Harbor Cafe | blue-harbor-cafe.example\nBlue Harbor Cafe | harbor-events.example\nOld Mill Studio | old-mill-studio.example\nGreen Leaf Florist | green-leaf-florist.example",
+              "type": "string"
+            },
+            {
+              "id": "csw-set-88d686a9",
+              "name": "watchlistName",
+              "value": "n8n-client-watch",
+              "type": "string"
+            },
+            {
+              "id": "csw-set-ca08c06c",
+              "name": "maxDomains",
+              "value": 100,
+              "type": "number"
+            },
+            {
+              "id": "csw-set-a682d714",
+              "name": "maxRunCostUsd",
+              "value": 1,
+              "type": "number"
+            },
+            {
+              "id": "csw-set-103646bd",
+              "name": "techCheckWeekday",
+              "value": 1,
+              "type": "number"
+            },
+            {
+              "id": "csw-set-b3920d3b",
+              "name": "confirmRuns",
+              "value": 2,
+              "type": "number"
+            },
+            {
+              "id": "csw-set-044561b4",
+              "name": "dailyReminderDays",
+              "value": 7,
+              "type": "number"
+            },
+            {
+              "id": "csw-set-f241c7c5",
+              "name": "failStreakAlert",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "csw-set-a9e3633f",
+              "name": "cooldownDays",
+              "value": 30,
+              "type": "number"
+            },
+            {
+              "id": "csw-set-45224e46",
+              "name": "minLevel",
+              "value": "low",
+              "type": "string"
+            },
+            {
+              "id": "csw-set-f147f1c3",
+              "name": "maxLinesInDigest",
+              "value": 40,
+              "type": "number"
+            },
+            {
+              "id": "csw-set-f04ab53c",
+              "name": "stateTableName",
+              "value": "client_watchdog_state",
+              "type": "string"
+            },
+            {
+              "id": "csw-set-2036a7cb",
+              "name": "useMockData",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "csw-set-5c732b46",
+              "name": "slackEnabled",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "csw-set-260da2e2",
+              "name": "slackChannel",
+              "value": "#client-sites",
+              "type": "string"
+            },
+            {
+              "id": "csw-set-68d428dd",
+              "name": "emailEnabled",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "csw-set-eca860b7",
+              "name": "emailFrom",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "csw-set-93f7ecc7",
+              "name": "emailTo",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "csw-003-c7f73bb5",
+      "name": "Settings",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -120,
+        440
+      ],
+      "notes": "clients: one \"Client | domain\" per line. techCheckWeekday: 1 = Monday ... 7 = Sunday, 0 = never, 8 = every run. minLevel: critical, high, medium or low (alerts below it are not sent). maxRunCostUsd: stop before any Apify call if the estimate is higher. useMockData = true: free test with fictional data, nothing sent or saved."
+    },
+    {
+      "parameters": {
+        "columns": {
+          "column": [
+            {
+              "name": "kind",
+              "type": "string"
+            },
+            {
+              "name": "key",
+              "type": "string"
+            },
+            {
+              "name": "domain",
+              "type": "string"
+            },
+            {
+              "name": "scope",
+              "type": "string"
+            },
+            {
+              "name": "level",
+              "type": "string"
+            },
+            {
+              "name": "at",
+              "type": "string"
+            },
+            {
+              "name": "note",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "createIfNotExists": true
+        },
+        "resource": "table",
+        "operation": "create",
+        "tableName": "={{ $('Settings').first().json.stateTableName }}"
+      },
+      "id": "csw-004-57e9f310",
+      "name": "Ensure state table",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        120,
+        440
+      ],
+      "executeOnce": true,
+      "notes": "Creates the small state table if it does not exist."
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "returnAll": true,
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Ensure state table').first().json.id }}"
+        }
+      },
+      "id": "csw-005-f417b4a1",
+      "name": "Get state rows",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        340,
+        440
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pure logic for the \"client site watchdog\" workflow. build.mjs inlines this file into the Code nodes.\n// No network, no credentials. Everything is unit-tested in test/logic.test.js.\n\nconst DAY = 86400000;\nconst LEVELS = ['critical', 'high', 'medium', 'low'];\nconst LEVEL_RANK = { critical: 0, high: 1, medium: 2, low: 3 };\nconst DOMAIN_RE = /^(?=.{4,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/;\n\nfunction normalizeDomain(raw) {\n  let s = String(raw ?? '').trim().toLowerCase();\n  s = s.replace(/^[a-z][a-z0-9+.-]*:\\/\\//, '').replace(/[/?#].*$/, '').replace(/:\\d+$/, '').replace(/\\.$/, '').replace(/^www\\./, '');\n  return DOMAIN_RE.test(s) ? s : null;\n}\n\n// \"Client name | domain\" per line (the client name is optional). Lines starting with # are comments.\nfunction parseClients(text, maxDomains = 100) {\n  const domains = [];\n  const problems = [];\n  const seen = new Set();\n  let truncated = 0;\n  String(text ?? '').split(/\\r?\\n/).forEach((line, i) => {\n    const t = line.trim();\n    if (!t || t.startsWith('#')) return;\n    const parts = t.split('|').map((x) => x.trim());\n    const rawDomain = parts.length > 1 ? parts[parts.length - 1] : parts[0];\n    const client = parts.length > 1 ? parts.slice(0, -1).join(' | ') || 'Unassigned' : 'Unassigned';\n    const domain = normalizeDomain(rawDomain);\n    if (!domain) { problems.push(`line ${i + 1}: \"${t.slice(0, 60)}\" is not a valid domain name`); return; }\n    if (seen.has(domain)) { problems.push(`line ${i + 1}: ${domain} is listed twice (kept the first)`); return; }\n    seen.add(domain);\n    if (domains.length >= maxDomains) { truncated += 1; return; }\n    domains.push({ client, domain });\n  });\n  if (truncated) problems.push(`${truncated} domain(s) over maxDomains (${maxDomains}) were left out`);\n  return { domains, problems };\n}\n\nfunction round(x, n = 2) { const f = 10 ** n; return Math.round(x * f) / f; }\n\nfunction estimateCost(count, techToday, prices = {}) {\n  const dns = prices.dnsPerCheck ?? 0.002;\n  const tech = prices.techPerCheck ?? 0.003;\n  const start = prices.start ?? 0.00005;\n  const run = count * dns + start + (techToday ? count * tech + start : 0);\n  const month = (count * dns * 30) + (count * tech * 4.35) + 2 * start * 30;\n  return { perRunUsd: round(run, 4), perMonthUsd: round(month, 2) };\n}\n\n// 1 = Monday ... 7 = Sunday (UTC)\nfunction weekdayUtc(now) { const d = new Date(now).getUTCDay(); return d === 0 ? 7 : d; }\n\nfunction planRun(settings, now = Date.now()) {\n  const parsed = parseClients(settings.clients, settings.maxDomains ?? 100);\n  const techToday = settings.useMockData === true ? true : settings.techCheckWeekday === 0 ? false : (settings.techCheckWeekday === 8 ? true : weekdayUtc(now) === (settings.techCheckWeekday || 1));\n  const cost = estimateCost(parsed.domains.length, techToday);\n  const plan = { problems: parsed.problems, domains: parsed.domains, techToday, cost, skip: false, reason: '' };\n  if (!parsed.domains.length) { plan.skip = true; plan.reason = 'No valid domains in Settings.clients. Nothing was run and nothing was charged.'; return plan; }\n  if (!settings.useMockData && settings.maxRunCostUsd > 0 && cost.perRunUsd > settings.maxRunCostUsd) {\n    plan.skip = true; plan.reason = `Estimated cost of this run ($${cost.perRunUsd}) is above maxRunCostUsd ($${settings.maxRunCostUsd}). Nothing was run and nothing was charged.`; return plan;\n  }\n  const names = parsed.domains.map((d) => d.domain);\n  plan.maxTotalChargeUsd = round(Math.max(0.01, cost.perRunUsd * 1.3), 3);\n  plan.dnsInput = { domains: names, watchlistName: settings.watchlistName, confirmRuns: settings.confirmRuns ?? 2, expiryWarningDays: [30, 14] };\n  plan.techInput = { domains: names, watchlistName: settings.watchlistName, confirmRuns: settings.confirmRuns ?? 2, minConfidence: 50 };\n  return plan;\n}\n\n// ---- classification -------------------------------------------------------------------------------------------------\n\nconst TECH_IMPORTANT = /pay|commerce|shop|analytic|tag manager|consent|cookie|checkout|security|captcha/i;\n\nfunction level(l, why) { return { level: l, why }; }\n\nfunction classifyDnsChange(r) {\n  const f = r.field;\n  if (r.change === 'expiring_soon') {\n    const d = r.daysToExpiry;\n    if (d <= 7) return level('critical', `expires in ${d} day(s)`);\n    if (d <= 14) return level('high', `expires in ${d} days`);\n    return level('medium', `expires in ${d} days`);\n  }\n  if (f === 'nameservers' || f === 'rdapNameservers') return level('critical', 'nameservers changed: the DNS provider may have moved (or the domain was hijacked)');\n  if (f === 'registrar') return level('critical', 'registrar changed: the domain was transferred');\n  if (f === 'domainStatus') return level('high', 'registry status flags changed (a lock may have been removed or a hold added)');\n  if (f === 'mx') return level('high', 'mail routing (MX) changed: check mail still arrives');\n  if (f === 'dmarc' || f === 'spf') {\n    if (r.after == null || (Array.isArray(r.after) && !r.after.length)) return level('high', `${f.toUpperCase()} record was removed: mail from this domain is easier to spoof and may land in spam`);\n    return level('medium', `${f.toUpperCase()} record was edited`);\n  }\n  if (f === 'expiresAt') return level('low', 'expiry date changed (usually a renewal)');\n  return level('medium', `${f || 'record'} changed`);\n}\n\nfunction classifyTechChange(r) {\n  const important = TECH_IMPORTANT.test(`${r.category || ''} ${r.technology || ''}`);\n  if (r.change === 'removed') return important ? level('high', `${r.technology} disappeared (${r.category || 'tool'}): the client site may have lost something it relied on`) : level('medium', `${r.technology} was removed`);\n  return level('low', `${r.technology} was added`);\n}\n\nfunction listText(v) { return Array.isArray(v) ? (v.length ? v.join(', ') : 'none') : (v == null ? 'none' : String(v)); }\nfunction short(s, n = 140) { s = String(s); return s.length > n ? `${s.slice(0, n - 1)}…` : s; }\nfunction dayKey(now) { return new Date(now).toISOString().slice(0, 10); }\n\nfunction classify({ dnsRows = [], techRows = [], techRan = false, clients = [], state = [], settings = {}, now = Date.now() }) {\n  const clientOf = new Map(clients.map((c) => [c.domain, c.client]));\n  const cooldownMs = (settings.cooldownDays ?? 30) * DAY;\n  const known = new Map();\n  for (const s of state) if (s.kind === 'alert') known.set(s.key, Math.max(known.get(s.key) ?? 0, Date.parse(s.at) || 0));\n  const alerts = [];\n  const notes = [];\n  const add = (a) => {\n    const lastAt = known.get(a.key);\n    if (lastAt && now - lastAt < (a.cooldownMs ?? cooldownMs)) { notes.push({ key: a.key, suppressed: 'already alerted' }); return; }\n    if (alerts.some((x) => x.key === a.key)) return;\n    alerts.push({ client: clientOf.get(a.domain) || 'Unassigned', ...a });\n  };\n  const dailyDays = settings.dailyReminderDays ?? 7;\n  const failN = settings.failStreakAlert ?? 3;\n  const today = dayKey(now);\n\n  const dnsDomainRows = dnsRows.filter((r) => r.type === 'domain');\n  const dnsChanges = dnsRows.filter((r) => r.type === 'change');\n  const hasDailyReminder = new Set();\n\n  // expiry reminders: every day while <= dailyDays (escalating), including already expired\n  for (const r of dnsDomainRows) {\n    if (r.status !== 'ok' || r.exists === false || typeof r.daysToExpiry !== 'number') continue;\n    if (r.daysToExpiry <= dailyDays) {\n      hasDailyReminder.add(r.domain);\n      const exp = r.current?.expiresAt || '';\n      const msg = r.daysToExpiry < 0 ? `expired ${-r.daysToExpiry} day(s) ago` : `expires in ${r.daysToExpiry} day(s)`;\n      add({ key: `exp-daily|${r.domain}|${exp}|${today}`, domain: r.domain, source: 'dns', level: r.daysToExpiry <= 7 ? 'critical' : 'high', title: 'Domain expiry', detail: `${msg}${exp ? ` (${exp})` : ''}. Reminders repeat daily until it is renewed.`, cooldownMs: DAY });\n    }\n  }\n  for (const r of dnsChanges) {\n    if (r.change === 'expiring_soon' && hasDailyReminder.has(r.domain)) continue;\n    const c = classifyDnsChange(r);\n    const when = r.confirmedAt || r.firstObservedAt || '';\n    const key = r.change === 'expiring_soon'\n      ? `exp-threshold|${r.domain}|${r.after}|${r.threshold}`\n      : `dns|${r.domain}|${r.change}|${r.field}|${short(JSON.stringify(r.after), 80)}|${when}`;\n    const detail = r.change === 'expiring_soon' ? `Domain ${c.why} (${r.after}).` : `${c.why}. Before: ${short(listText(r.before))}. Now: ${short(listText(r.after))}.`;\n    add({ key, domain: r.domain, source: 'dns', level: c.level, title: r.change === 'expiring_soon' ? 'Domain expiry' : `DNS/registration: ${r.field}`, detail, cooldownMs: 365 * DAY });\n  }\n  for (const r of dnsDomainRows) {\n    if (r.exists === false) add({ key: `nxdomain|${r.domain}|${today}`, domain: r.domain, source: 'dns', level: 'critical', title: 'Domain does not exist', detail: 'The domain returns \"does not exist\" (NXDOMAIN). It may have lapsed or been deleted, or it is mistyped in your list.', cooldownMs: DAY });\n  }\n  const techDomainRows = techRows.filter((r) => r.type === 'domain');\n  for (const r of techRows.filter((x) => x.type === 'change')) {\n    const c = classifyTechChange(r);\n    add({ key: `tech|${r.domain}|${r.change}|${r.technology}|${r.confirmedAt || ''}`, domain: r.domain, source: 'tech', level: c.level, title: `Technology ${r.change}`, detail: `${c.why}.${r.category ? ` Category: ${r.category}.` : ''}`, cooldownMs: 365 * DAY });\n  }\n\n  // failures: a failed check is \"unknown\", never a change. Alert only after failN runs in a row.\n  const stateRows = state.filter((s) => s.kind === 'fail' || s.kind === 'ok');\n  const streakOf = (domain, scope) => {\n    const rows = stateRows.filter((s) => s.domain === domain && s.scope === scope).sort((a, b) => Date.parse(a.at) - Date.parse(b.at));\n    let n = 0;\n    for (const s of rows) n = s.kind === 'fail' ? n + 1 : 0;\n    return n;\n  };\n  const failed = [];\n  const okNow = [];\n  const check = (rows, scope, isFail, isOk) => {\n    for (const r of rows) {\n      if (isFail(r)) {\n        const streak = streakOf(r.domain, scope) + 1;\n        failed.push({ domain: r.domain, scope, streak, reason: r.errorType || (r.errors && r.errors[0]) || r.scanStatus || r.status });\n        if (streak >= failN && streak % failN === 0) add({ key: `fail|${r.domain}|${scope}|${streak}`, domain: r.domain, source: scope, level: 'low', title: `Could not check (${scope})`, detail: `${streak} checks in a row failed. This is NOT a change: the last known state is unchanged. Possible causes: the site blocks automated checks or is down.`, cooldownMs: 365 * DAY });\n      } else if (isOk(r)) okNow.push({ domain: r.domain, scope, reset: streakOf(r.domain, scope) > 0 });\n    }\n  };\n  check(dnsDomainRows, 'dns', (r) => r.status === 'failed' && r.exists !== false, (r) => r.status === 'ok');\n  if (techRan) {\n    check(techDomainRows.filter((r) => r.scanStatus !== 'skipped_robots'), 'tech', (r) => r.scanStatus === 'error' || r.scanStatus === 'blocked', (r) => r.scanStatus === 'ok');\n    for (const r of techDomainRows.filter((x) => x.scanStatus === 'skipped_robots')) add({ key: `robots|${r.domain}`, domain: r.domain, source: 'tech', level: 'low', title: 'Technology check skipped', detail: 'This site\\'s robots.txt disallows automated checks, so technology changes are not monitored for it (DNS and expiry still are).', cooldownMs: 90 * DAY });\n  }\n\n  // monitoring health: no rows at all means the Actor run itself failed, which must not look like \"all quiet\"\n  const expected = clients.length;\n  const dnsHealthy = dnsDomainRows.length > 0;\n  if (expected && !dnsHealthy) add({ key: `health|dns|${today}`, domain: '(all)', source: 'dns', level: 'high', title: 'Monitoring did not run', detail: 'The DNS Actor returned no data (run failed, spending cap reached or Apify credential problem). Nothing was checked today: this is NOT an all-clear.', cooldownMs: DAY });\n  if (techRan && expected && !techDomainRows.length) add({ key: `health|tech|${today}`, domain: '(all)', source: 'tech', level: 'medium', title: 'Technology monitoring did not run', detail: 'The Tech Stack Change Monitor returned no data. DNS and expiry checks above are unaffected.', cooldownMs: DAY });\n\n  alerts.sort((a, b) => LEVEL_RANK[a.level] - LEVEL_RANK[b.level] || a.client.localeCompare(b.client) || a.domain.localeCompare(b.domain));\n  const baselineCount = dnsDomainRows.filter((r) => r.baseline).length;\n  return { alerts, failed, okNow, notes, summary: { clients: new Set(clients.map((c) => c.client)).size, domains: expected, dnsChecked: dnsDomainRows.filter((r) => r.status === 'ok').length, techChecked: techRan ? techDomainRows.filter((r) => r.scanStatus === 'ok').length : null, baselineCount, alerts: alerts.length, bySeverity: Object.fromEntries(LEVELS.map((l) => [l, alerts.filter((a) => a.level === l).length])) } };\n}\n\n// ---- digest ----------------------------------------------------------------------------------------------------------\n\nconst ICON = { critical: '🔴', high: '🟠', medium: '🟡', low: '⚪' };\nconst esc = (s) => String(s).replace(/[&<>\"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[c]));\n\nfunction buildDigest(result, settings = {}, plan = {}) {\n  const { alerts, summary } = result;\n  const minLevel = LEVEL_RANK[settings.minLevel] ?? 3;\n  const shown = alerts.filter((a) => LEVEL_RANK[a.level] <= minLevel);\n  const maxLines = settings.maxLinesInDigest ?? 40;\n  const baselineOnly = !shown.length && summary.baselineCount > 0;\n  const send = shown.length > 0;\n  const top = shown[0]?.level;\n  const subject = send ? `[${top.toUpperCase()}] ${shown.length} client domain alert${shown.length > 1 ? 's' : ''}${settings.useMockData ? ' (TEST DATA)' : ''}` : '';\n  const lines = [];\n  const clientsSeen = [...new Set(shown.map((a) => a.client))];\n  for (const c of clientsSeen) {\n    lines.push(`*${c}*`);\n    for (const a of shown.filter((x) => x.client === c).slice(0, maxLines)) lines.push(`${ICON[a.level]} ${a.level.toUpperCase()} · ${a.domain} · ${a.title}: ${a.detail}`);\n  }\n  const foot = `Checked ${summary.domains} domain(s) for ${summary.clients} client(s)${summary.techChecked != null ? `; technology check ran today (${summary.techChecked} ok)` : '; technology check runs on its own weekday'}. Estimated Apify cost of this run: $${plan.cost?.perRunUsd ?? '?'}.`;\n  const text = send ? `${subject}\\n\\n${lines.join('\\n')}\\n\\n${foot}` : '';\n  const html = send ? `<h3>${esc(subject)}</h3>${clientsSeen.map((c) => `<h4>${esc(c)}</h4><ul>${shown.filter((x) => x.client === c).map((a) => `<li>${ICON[a.level]} <b>${a.level.toUpperCase()}</b> · ${esc(a.domain)} · ${esc(a.title)}: ${esc(a.detail)}</li>`).join('')}</ul>`).join('')}<p><small>${esc(foot)}</small></p>` : '';\n  return { send, subject, text, html, count: shown.length, hiddenByMinLevel: alerts.length - shown.length, baselineOnly, quietNote: send ? '' : (baselineOnly ? `Baseline saved for ${summary.baselineCount} domain(s). No alerts on a first run.` : 'All quiet: nothing changed, nothing to send.'), summary };\n}\n\n// rows to append to the state data table after a successful notification\nfunction planWrites(result, digestSent, now = Date.now()) {\n  const at = new Date(now).toISOString();\n  const rows = [];\n  for (const a of result.alerts) rows.push({ kind: 'alert', key: a.key, domain: a.domain, scope: a.source, level: a.level, at, note: short(a.title, 60) });\n  const failedSet = new Set(result.failed.map((f) => `${f.domain}|${f.scope}`));\n  for (const f of result.failed) rows.push({ kind: 'fail', key: '', domain: f.domain, scope: f.scope, level: '', at, note: short(String(f.reason ?? ''), 60) });\n  for (const o of result.okNow) if (!failedSet.has(`${o.domain}|${o.scope}`) && o.reset) rows.push({ kind: 'ok', key: '', domain: o.domain, scope: o.scope, level: '', at, note: 'recovered' });\n  return rows;\n}\n\n// ---- test data (fictional .example domains; used only while useMockData is true) ---------------------------------------\n\nfunction mockActorRows(domains, now, scope) {\n  const iso = (ms) => new Date(ms).toISOString();\n  const day = (n) => iso(now + n * DAY).slice(0, 10);\n  const base = (domain) => ({ type: 'domain', domain, checkedAt: iso(now), status: 'ok', exists: true, baseline: false, changes: 0, errors: [], unknownFields: [], current: { expiresAt: day(400) }, daysToExpiry: 400 });\n  const rows = [];\n  for (const { domain } of domains) {\n    if (scope === 'dns') {\n      const r = base(domain);\n      if (domain === 'northwind-dental.example') {\n        r.daysToExpiry = 5; r.current.expiresAt = day(5);\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'nameservers', before: ['ns1.old-host.example'], after: ['ns1.new-host.example', 'ns2.new-host.example'], confirmedAt: iso(now - 3600000), confirmations: 2 });\n      }\n      if (domain === 'blue-harbor-cafe.example') {\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'dmarc', before: 'v=DMARC1; p=quarantine', after: null, confirmedAt: iso(now - 7200000), confirmations: 2 });\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'spf', before: 'v=spf1 include:_spf.mail-a.example ~all', after: 'v=spf1 include:_spf.mail-b.example ~all', confirmedAt: iso(now - 7200000), confirmations: 2 });\n      }\n      if (domain === 'harbor-events.example') { r.status = 'failed'; r.errors = ['dns_timeout']; r.current = {}; r.daysToExpiry = null; }\n      if (domain === 'old-mill-studio.example') { r.exists = false; r.current = {}; r.daysToExpiry = null; }\n      if (domain === 'green-leaf-florist.example') {\n        r.daysToExpiry = 14; r.current.expiresAt = day(14);\n        rows.push({ type: 'change', domain, change: 'expiring_soon', after: day(14), daysToExpiry: 14, threshold: 14 });\n      }\n      rows.push(r);\n    } else {\n      const r = { type: 'domain', domain, scanStatus: 'ok', errorType: null, baseline: false, changes: 0, technologies: [], pending: [], lastSuccessfulCheckAt: iso(now) };\n      if (domain === 'shop.acme-bakery.example') rows.push({ type: 'change', domain, change: 'removed', technology: 'Stripe', category: 'Payments', lastSeenAt: iso(now - 8 * DAY), firstMissingAt: iso(now - 7 * DAY), confirmedAt: iso(now - 3600000), confirmations: 2 });\n      if (domain === 'green-leaf-florist.example') rows.push({ type: 'change', domain, change: 'added', technology: 'Klaviyo', category: 'Email marketing', confidence: 90, confirmedAt: iso(now - 3600000), confirmations: 2 });\n      if (domain === 'harbor-events.example') { r.scanStatus = 'blocked'; r.errorType = 'http_403'; }\n      rows.push(r);\n    }\n  }\n  return rows;\n}\n\nconst plan = planRun($('Settings').first().json, Date.now());\nreturn [{ json: plan }];"
+      },
+      "id": "csw-006-60627c59",
+      "name": "Plan run",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        440
+      ],
+      "notes": "Reads the client list, reports invalid or duplicate lines, decides whether the technology check runs today, estimates the cost and applies the budget guard."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "csw-if-bc9f79fc",
+              "leftValue": "={{ $json.skip !== true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "csw-007-bc9f79fc",
+      "name": "Anything to run?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        780,
+        440
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "csw-008-bdd54e5f",
+      "name": "Nothing to run (see reason)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        780,
+        660
+      ],
+      "notes": "Empty client list or estimate above maxRunCostUsd. Nothing was run and nothing was charged; read \"reason\" in the Plan run output."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "csw-if-38199011",
+              "leftValue": "={{ $('Settings').first().json.useMockData }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "csw-009-38199011",
+      "name": "Use mock data? (DNS)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1000,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// TEST DATA ONLY (useMockData = true): fictional .example domains, no Apify call.\n// Pure logic for the \"client site watchdog\" workflow. build.mjs inlines this file into the Code nodes.\n// No network, no credentials. Everything is unit-tested in test/logic.test.js.\n\nconst DAY = 86400000;\nconst LEVELS = ['critical', 'high', 'medium', 'low'];\nconst LEVEL_RANK = { critical: 0, high: 1, medium: 2, low: 3 };\nconst DOMAIN_RE = /^(?=.{4,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/;\n\nfunction normalizeDomain(raw) {\n  let s = String(raw ?? '').trim().toLowerCase();\n  s = s.replace(/^[a-z][a-z0-9+.-]*:\\/\\//, '').replace(/[/?#].*$/, '').replace(/:\\d+$/, '').replace(/\\.$/, '').replace(/^www\\./, '');\n  return DOMAIN_RE.test(s) ? s : null;\n}\n\n// \"Client name | domain\" per line (the client name is optional). Lines starting with # are comments.\nfunction parseClients(text, maxDomains = 100) {\n  const domains = [];\n  const problems = [];\n  const seen = new Set();\n  let truncated = 0;\n  String(text ?? '').split(/\\r?\\n/).forEach((line, i) => {\n    const t = line.trim();\n    if (!t || t.startsWith('#')) return;\n    const parts = t.split('|').map((x) => x.trim());\n    const rawDomain = parts.length > 1 ? parts[parts.length - 1] : parts[0];\n    const client = parts.length > 1 ? parts.slice(0, -1).join(' | ') || 'Unassigned' : 'Unassigned';\n    const domain = normalizeDomain(rawDomain);\n    if (!domain) { problems.push(`line ${i + 1}: \"${t.slice(0, 60)}\" is not a valid domain name`); return; }\n    if (seen.has(domain)) { problems.push(`line ${i + 1}: ${domain} is listed twice (kept the first)`); return; }\n    seen.add(domain);\n    if (domains.length >= maxDomains) { truncated += 1; return; }\n    domains.push({ client, domain });\n  });\n  if (truncated) problems.push(`${truncated} domain(s) over maxDomains (${maxDomains}) were left out`);\n  return { domains, problems };\n}\n\nfunction round(x, n = 2) { const f = 10 ** n; return Math.round(x * f) / f; }\n\nfunction estimateCost(count, techToday, prices = {}) {\n  const dns = prices.dnsPerCheck ?? 0.002;\n  const tech = prices.techPerCheck ?? 0.003;\n  const start = prices.start ?? 0.00005;\n  const run = count * dns + start + (techToday ? count * tech + start : 0);\n  const month = (count * dns * 30) + (count * tech * 4.35) + 2 * start * 30;\n  return { perRunUsd: round(run, 4), perMonthUsd: round(month, 2) };\n}\n\n// 1 = Monday ... 7 = Sunday (UTC)\nfunction weekdayUtc(now) { const d = new Date(now).getUTCDay(); return d === 0 ? 7 : d; }\n\nfunction planRun(settings, now = Date.now()) {\n  const parsed = parseClients(settings.clients, settings.maxDomains ?? 100);\n  const techToday = settings.useMockData === true ? true : settings.techCheckWeekday === 0 ? false : (settings.techCheckWeekday === 8 ? true : weekdayUtc(now) === (settings.techCheckWeekday || 1));\n  const cost = estimateCost(parsed.domains.length, techToday);\n  const plan = { problems: parsed.problems, domains: parsed.domains, techToday, cost, skip: false, reason: '' };\n  if (!parsed.domains.length) { plan.skip = true; plan.reason = 'No valid domains in Settings.clients. Nothing was run and nothing was charged.'; return plan; }\n  if (!settings.useMockData && settings.maxRunCostUsd > 0 && cost.perRunUsd > settings.maxRunCostUsd) {\n    plan.skip = true; plan.reason = `Estimated cost of this run ($${cost.perRunUsd}) is above maxRunCostUsd ($${settings.maxRunCostUsd}). Nothing was run and nothing was charged.`; return plan;\n  }\n  const names = parsed.domains.map((d) => d.domain);\n  plan.maxTotalChargeUsd = round(Math.max(0.01, cost.perRunUsd * 1.3), 3);\n  plan.dnsInput = { domains: names, watchlistName: settings.watchlistName, confirmRuns: settings.confirmRuns ?? 2, expiryWarningDays: [30, 14] };\n  plan.techInput = { domains: names, watchlistName: settings.watchlistName, confirmRuns: settings.confirmRuns ?? 2, minConfidence: 50 };\n  return plan;\n}\n\n// ---- classification -------------------------------------------------------------------------------------------------\n\nconst TECH_IMPORTANT = /pay|commerce|shop|analytic|tag manager|consent|cookie|checkout|security|captcha/i;\n\nfunction level(l, why) { return { level: l, why }; }\n\nfunction classifyDnsChange(r) {\n  const f = r.field;\n  if (r.change === 'expiring_soon') {\n    const d = r.daysToExpiry;\n    if (d <= 7) return level('critical', `expires in ${d} day(s)`);\n    if (d <= 14) return level('high', `expires in ${d} days`);\n    return level('medium', `expires in ${d} days`);\n  }\n  if (f === 'nameservers' || f === 'rdapNameservers') return level('critical', 'nameservers changed: the DNS provider may have moved (or the domain was hijacked)');\n  if (f === 'registrar') return level('critical', 'registrar changed: the domain was transferred');\n  if (f === 'domainStatus') return level('high', 'registry status flags changed (a lock may have been removed or a hold added)');\n  if (f === 'mx') return level('high', 'mail routing (MX) changed: check mail still arrives');\n  if (f === 'dmarc' || f === 'spf') {\n    if (r.after == null || (Array.isArray(r.after) && !r.after.length)) return level('high', `${f.toUpperCase()} record was removed: mail from this domain is easier to spoof and may land in spam`);\n    return level('medium', `${f.toUpperCase()} record was edited`);\n  }\n  if (f === 'expiresAt') return level('low', 'expiry date changed (usually a renewal)');\n  return level('medium', `${f || 'record'} changed`);\n}\n\nfunction classifyTechChange(r) {\n  const important = TECH_IMPORTANT.test(`${r.category || ''} ${r.technology || ''}`);\n  if (r.change === 'removed') return important ? level('high', `${r.technology} disappeared (${r.category || 'tool'}): the client site may have lost something it relied on`) : level('medium', `${r.technology} was removed`);\n  return level('low', `${r.technology} was added`);\n}\n\nfunction listText(v) { return Array.isArray(v) ? (v.length ? v.join(', ') : 'none') : (v == null ? 'none' : String(v)); }\nfunction short(s, n = 140) { s = String(s); return s.length > n ? `${s.slice(0, n - 1)}…` : s; }\nfunction dayKey(now) { return new Date(now).toISOString().slice(0, 10); }\n\nfunction classify({ dnsRows = [], techRows = [], techRan = false, clients = [], state = [], settings = {}, now = Date.now() }) {\n  const clientOf = new Map(clients.map((c) => [c.domain, c.client]));\n  const cooldownMs = (settings.cooldownDays ?? 30) * DAY;\n  const known = new Map();\n  for (const s of state) if (s.kind === 'alert') known.set(s.key, Math.max(known.get(s.key) ?? 0, Date.parse(s.at) || 0));\n  const alerts = [];\n  const notes = [];\n  const add = (a) => {\n    const lastAt = known.get(a.key);\n    if (lastAt && now - lastAt < (a.cooldownMs ?? cooldownMs)) { notes.push({ key: a.key, suppressed: 'already alerted' }); return; }\n    if (alerts.some((x) => x.key === a.key)) return;\n    alerts.push({ client: clientOf.get(a.domain) || 'Unassigned', ...a });\n  };\n  const dailyDays = settings.dailyReminderDays ?? 7;\n  const failN = settings.failStreakAlert ?? 3;\n  const today = dayKey(now);\n\n  const dnsDomainRows = dnsRows.filter((r) => r.type === 'domain');\n  const dnsChanges = dnsRows.filter((r) => r.type === 'change');\n  const hasDailyReminder = new Set();\n\n  // expiry reminders: every day while <= dailyDays (escalating), including already expired\n  for (const r of dnsDomainRows) {\n    if (r.status !== 'ok' || r.exists === false || typeof r.daysToExpiry !== 'number') continue;\n    if (r.daysToExpiry <= dailyDays) {\n      hasDailyReminder.add(r.domain);\n      const exp = r.current?.expiresAt || '';\n      const msg = r.daysToExpiry < 0 ? `expired ${-r.daysToExpiry} day(s) ago` : `expires in ${r.daysToExpiry} day(s)`;\n      add({ key: `exp-daily|${r.domain}|${exp}|${today}`, domain: r.domain, source: 'dns', level: r.daysToExpiry <= 7 ? 'critical' : 'high', title: 'Domain expiry', detail: `${msg}${exp ? ` (${exp})` : ''}. Reminders repeat daily until it is renewed.`, cooldownMs: DAY });\n    }\n  }\n  for (const r of dnsChanges) {\n    if (r.change === 'expiring_soon' && hasDailyReminder.has(r.domain)) continue;\n    const c = classifyDnsChange(r);\n    const when = r.confirmedAt || r.firstObservedAt || '';\n    const key = r.change === 'expiring_soon'\n      ? `exp-threshold|${r.domain}|${r.after}|${r.threshold}`\n      : `dns|${r.domain}|${r.change}|${r.field}|${short(JSON.stringify(r.after), 80)}|${when}`;\n    const detail = r.change === 'expiring_soon' ? `Domain ${c.why} (${r.after}).` : `${c.why}. Before: ${short(listText(r.before))}. Now: ${short(listText(r.after))}.`;\n    add({ key, domain: r.domain, source: 'dns', level: c.level, title: r.change === 'expiring_soon' ? 'Domain expiry' : `DNS/registration: ${r.field}`, detail, cooldownMs: 365 * DAY });\n  }\n  for (const r of dnsDomainRows) {\n    if (r.exists === false) add({ key: `nxdomain|${r.domain}|${today}`, domain: r.domain, source: 'dns', level: 'critical', title: 'Domain does not exist', detail: 'The domain returns \"does not exist\" (NXDOMAIN). It may have lapsed or been deleted, or it is mistyped in your list.', cooldownMs: DAY });\n  }\n  const techDomainRows = techRows.filter((r) => r.type === 'domain');\n  for (const r of techRows.filter((x) => x.type === 'change')) {\n    const c = classifyTechChange(r);\n    add({ key: `tech|${r.domain}|${r.change}|${r.technology}|${r.confirmedAt || ''}`, domain: r.domain, source: 'tech', level: c.level, title: `Technology ${r.change}`, detail: `${c.why}.${r.category ? ` Category: ${r.category}.` : ''}`, cooldownMs: 365 * DAY });\n  }\n\n  // failures: a failed check is \"unknown\", never a change. Alert only after failN runs in a row.\n  const stateRows = state.filter((s) => s.kind === 'fail' || s.kind === 'ok');\n  const streakOf = (domain, scope) => {\n    const rows = stateRows.filter((s) => s.domain === domain && s.scope === scope).sort((a, b) => Date.parse(a.at) - Date.parse(b.at));\n    let n = 0;\n    for (const s of rows) n = s.kind === 'fail' ? n + 1 : 0;\n    return n;\n  };\n  const failed = [];\n  const okNow = [];\n  const check = (rows, scope, isFail, isOk) => {\n    for (const r of rows) {\n      if (isFail(r)) {\n        const streak = streakOf(r.domain, scope) + 1;\n        failed.push({ domain: r.domain, scope, streak, reason: r.errorType || (r.errors && r.errors[0]) || r.scanStatus || r.status });\n        if (streak >= failN && streak % failN === 0) add({ key: `fail|${r.domain}|${scope}|${streak}`, domain: r.domain, source: scope, level: 'low', title: `Could not check (${scope})`, detail: `${streak} checks in a row failed. This is NOT a change: the last known state is unchanged. Possible causes: the site blocks automated checks or is down.`, cooldownMs: 365 * DAY });\n      } else if (isOk(r)) okNow.push({ domain: r.domain, scope, reset: streakOf(r.domain, scope) > 0 });\n    }\n  };\n  check(dnsDomainRows, 'dns', (r) => r.status === 'failed' && r.exists !== false, (r) => r.status === 'ok');\n  if (techRan) {\n    check(techDomainRows.filter((r) => r.scanStatus !== 'skipped_robots'), 'tech', (r) => r.scanStatus === 'error' || r.scanStatus === 'blocked', (r) => r.scanStatus === 'ok');\n    for (const r of techDomainRows.filter((x) => x.scanStatus === 'skipped_robots')) add({ key: `robots|${r.domain}`, domain: r.domain, source: 'tech', level: 'low', title: 'Technology check skipped', detail: 'This site\\'s robots.txt disallows automated checks, so technology changes are not monitored for it (DNS and expiry still are).', cooldownMs: 90 * DAY });\n  }\n\n  // monitoring health: no rows at all means the Actor run itself failed, which must not look like \"all quiet\"\n  const expected = clients.length;\n  const dnsHealthy = dnsDomainRows.length > 0;\n  if (expected && !dnsHealthy) add({ key: `health|dns|${today}`, domain: '(all)', source: 'dns', level: 'high', title: 'Monitoring did not run', detail: 'The DNS Actor returned no data (run failed, spending cap reached or Apify credential problem). Nothing was checked today: this is NOT an all-clear.', cooldownMs: DAY });\n  if (techRan && expected && !techDomainRows.length) add({ key: `health|tech|${today}`, domain: '(all)', source: 'tech', level: 'medium', title: 'Technology monitoring did not run', detail: 'The Tech Stack Change Monitor returned no data. DNS and expiry checks above are unaffected.', cooldownMs: DAY });\n\n  alerts.sort((a, b) => LEVEL_RANK[a.level] - LEVEL_RANK[b.level] || a.client.localeCompare(b.client) || a.domain.localeCompare(b.domain));\n  const baselineCount = dnsDomainRows.filter((r) => r.baseline).length;\n  return { alerts, failed, okNow, notes, summary: { clients: new Set(clients.map((c) => c.client)).size, domains: expected, dnsChecked: dnsDomainRows.filter((r) => r.status === 'ok').length, techChecked: techRan ? techDomainRows.filter((r) => r.scanStatus === 'ok').length : null, baselineCount, alerts: alerts.length, bySeverity: Object.fromEntries(LEVELS.map((l) => [l, alerts.filter((a) => a.level === l).length])) } };\n}\n\n// ---- digest ----------------------------------------------------------------------------------------------------------\n\nconst ICON = { critical: '🔴', high: '🟠', medium: '🟡', low: '⚪' };\nconst esc = (s) => String(s).replace(/[&<>\"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[c]));\n\nfunction buildDigest(result, settings = {}, plan = {}) {\n  const { alerts, summary } = result;\n  const minLevel = LEVEL_RANK[settings.minLevel] ?? 3;\n  const shown = alerts.filter((a) => LEVEL_RANK[a.level] <= minLevel);\n  const maxLines = settings.maxLinesInDigest ?? 40;\n  const baselineOnly = !shown.length && summary.baselineCount > 0;\n  const send = shown.length > 0;\n  const top = shown[0]?.level;\n  const subject = send ? `[${top.toUpperCase()}] ${shown.length} client domain alert${shown.length > 1 ? 's' : ''}${settings.useMockData ? ' (TEST DATA)' : ''}` : '';\n  const lines = [];\n  const clientsSeen = [...new Set(shown.map((a) => a.client))];\n  for (const c of clientsSeen) {\n    lines.push(`*${c}*`);\n    for (const a of shown.filter((x) => x.client === c).slice(0, maxLines)) lines.push(`${ICON[a.level]} ${a.level.toUpperCase()} · ${a.domain} · ${a.title}: ${a.detail}`);\n  }\n  const foot = `Checked ${summary.domains} domain(s) for ${summary.clients} client(s)${summary.techChecked != null ? `; technology check ran today (${summary.techChecked} ok)` : '; technology check runs on its own weekday'}. Estimated Apify cost of this run: $${plan.cost?.perRunUsd ?? '?'}.`;\n  const text = send ? `${subject}\\n\\n${lines.join('\\n')}\\n\\n${foot}` : '';\n  const html = send ? `<h3>${esc(subject)}</h3>${clientsSeen.map((c) => `<h4>${esc(c)}</h4><ul>${shown.filter((x) => x.client === c).map((a) => `<li>${ICON[a.level]} <b>${a.level.toUpperCase()}</b> · ${esc(a.domain)} · ${esc(a.title)}: ${esc(a.detail)}</li>`).join('')}</ul>`).join('')}<p><small>${esc(foot)}</small></p>` : '';\n  return { send, subject, text, html, count: shown.length, hiddenByMinLevel: alerts.length - shown.length, baselineOnly, quietNote: send ? '' : (baselineOnly ? `Baseline saved for ${summary.baselineCount} domain(s). No alerts on a first run.` : 'All quiet: nothing changed, nothing to send.'), summary };\n}\n\n// rows to append to the state data table after a successful notification\nfunction planWrites(result, digestSent, now = Date.now()) {\n  const at = new Date(now).toISOString();\n  const rows = [];\n  for (const a of result.alerts) rows.push({ kind: 'alert', key: a.key, domain: a.domain, scope: a.source, level: a.level, at, note: short(a.title, 60) });\n  const failedSet = new Set(result.failed.map((f) => `${f.domain}|${f.scope}`));\n  for (const f of result.failed) rows.push({ kind: 'fail', key: '', domain: f.domain, scope: f.scope, level: '', at, note: short(String(f.reason ?? ''), 60) });\n  for (const o of result.okNow) if (!failedSet.has(`${o.domain}|${o.scope}`) && o.reset) rows.push({ kind: 'ok', key: '', domain: o.domain, scope: o.scope, level: '', at, note: 'recovered' });\n  return rows;\n}\n\n// ---- test data (fictional .example domains; used only while useMockData is true) ---------------------------------------\n\nfunction mockActorRows(domains, now, scope) {\n  const iso = (ms) => new Date(ms).toISOString();\n  const day = (n) => iso(now + n * DAY).slice(0, 10);\n  const base = (domain) => ({ type: 'domain', domain, checkedAt: iso(now), status: 'ok', exists: true, baseline: false, changes: 0, errors: [], unknownFields: [], current: { expiresAt: day(400) }, daysToExpiry: 400 });\n  const rows = [];\n  for (const { domain } of domains) {\n    if (scope === 'dns') {\n      const r = base(domain);\n      if (domain === 'northwind-dental.example') {\n        r.daysToExpiry = 5; r.current.expiresAt = day(5);\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'nameservers', before: ['ns1.old-host.example'], after: ['ns1.new-host.example', 'ns2.new-host.example'], confirmedAt: iso(now - 3600000), confirmations: 2 });\n      }\n      if (domain === 'blue-harbor-cafe.example') {\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'dmarc', before: 'v=DMARC1; p=quarantine', after: null, confirmedAt: iso(now - 7200000), confirmations: 2 });\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'spf', before: 'v=spf1 include:_spf.mail-a.example ~all', after: 'v=spf1 include:_spf.mail-b.example ~all', confirmedAt: iso(now - 7200000), confirmations: 2 });\n      }\n      if (domain === 'harbor-events.example') { r.status = 'failed'; r.errors = ['dns_timeout']; r.current = {}; r.daysToExpiry = null; }\n      if (domain === 'old-mill-studio.example') { r.exists = false; r.current = {}; r.daysToExpiry = null; }\n      if (domain === 'green-leaf-florist.example') {\n        r.daysToExpiry = 14; r.current.expiresAt = day(14);\n        rows.push({ type: 'change', domain, change: 'expiring_soon', after: day(14), daysToExpiry: 14, threshold: 14 });\n      }\n      rows.push(r);\n    } else {\n      const r = { type: 'domain', domain, scanStatus: 'ok', errorType: null, baseline: false, changes: 0, technologies: [], pending: [], lastSuccessfulCheckAt: iso(now) };\n      if (domain === 'shop.acme-bakery.example') rows.push({ type: 'change', domain, change: 'removed', technology: 'Stripe', category: 'Payments', lastSeenAt: iso(now - 8 * DAY), firstMissingAt: iso(now - 7 * DAY), confirmedAt: iso(now - 3600000), confirmations: 2 });\n      if (domain === 'green-leaf-florist.example') rows.push({ type: 'change', domain, change: 'added', technology: 'Klaviyo', category: 'Email marketing', confidence: 90, confirmedAt: iso(now - 3600000), confirmations: 2 });\n      if (domain === 'harbor-events.example') { r.scanStatus = 'blocked'; r.errorType = 'http_403'; }\n      rows.push(r);\n    }\n  }\n  return rows;\n}\n\nconst plan = $('Plan run').first().json;\nreturn mockActorRows(plan.domains, Date.now(), 'dns').map((json) => ({ json }));"
+      },
+      "id": "csw-010-9b38facf",
+      "name": "Mock DNS output (test data, free)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1220,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "apifyApi",
+        "resource": "Actors",
+        "operation": "Run actor and get dataset",
+        "actorSource": "store",
+        "actorId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ASFOeHBwIA693rtne"
+        },
+        "actorInputMode": "json",
+        "customBody": "={{ JSON.stringify($('Plan run').first().json.dnsInput) }}",
+        "timeout": 900,
+        "memory": 256,
+        "maxTotalChargeUsd": "={{ $('Plan run').first().json.maxTotalChargeUsd }}",
+        "build": ""
+      },
+      "id": "csw-011-d55b8e84",
+      "name": "Run DNS & RDAP Change Feed",
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 2,
+      "position": [
+        1220,
+        480
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "notes": "asunoki/dns-rdap-change-feed ($0.002 per successful domain check). Select your Apify API credential. If the run fails, the next step reports \"Monitoring did not run\" instead of an all-clear."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "csw-if-a65569b7",
+              "leftValue": "={{ $('Plan run').first().json.techToday }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "csw-012-a65569b7",
+      "name": "Technology check today?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1460,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "csw-if-d29409c7",
+              "leftValue": "={{ $('Settings').first().json.useMockData }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "csw-013-d29409c7",
+      "name": "Use mock data? (technology)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// TEST DATA ONLY (useMockData = true): fictional .example domains, no Apify call.\n// Pure logic for the \"client site watchdog\" workflow. build.mjs inlines this file into the Code nodes.\n// No network, no credentials. Everything is unit-tested in test/logic.test.js.\n\nconst DAY = 86400000;\nconst LEVELS = ['critical', 'high', 'medium', 'low'];\nconst LEVEL_RANK = { critical: 0, high: 1, medium: 2, low: 3 };\nconst DOMAIN_RE = /^(?=.{4,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/;\n\nfunction normalizeDomain(raw) {\n  let s = String(raw ?? '').trim().toLowerCase();\n  s = s.replace(/^[a-z][a-z0-9+.-]*:\\/\\//, '').replace(/[/?#].*$/, '').replace(/:\\d+$/, '').replace(/\\.$/, '').replace(/^www\\./, '');\n  return DOMAIN_RE.test(s) ? s : null;\n}\n\n// \"Client name | domain\" per line (the client name is optional). Lines starting with # are comments.\nfunction parseClients(text, maxDomains = 100) {\n  const domains = [];\n  const problems = [];\n  const seen = new Set();\n  let truncated = 0;\n  String(text ?? '').split(/\\r?\\n/).forEach((line, i) => {\n    const t = line.trim();\n    if (!t || t.startsWith('#')) return;\n    const parts = t.split('|').map((x) => x.trim());\n    const rawDomain = parts.length > 1 ? parts[parts.length - 1] : parts[0];\n    const client = parts.length > 1 ? parts.slice(0, -1).join(' | ') || 'Unassigned' : 'Unassigned';\n    const domain = normalizeDomain(rawDomain);\n    if (!domain) { problems.push(`line ${i + 1}: \"${t.slice(0, 60)}\" is not a valid domain name`); return; }\n    if (seen.has(domain)) { problems.push(`line ${i + 1}: ${domain} is listed twice (kept the first)`); return; }\n    seen.add(domain);\n    if (domains.length >= maxDomains) { truncated += 1; return; }\n    domains.push({ client, domain });\n  });\n  if (truncated) problems.push(`${truncated} domain(s) over maxDomains (${maxDomains}) were left out`);\n  return { domains, problems };\n}\n\nfunction round(x, n = 2) { const f = 10 ** n; return Math.round(x * f) / f; }\n\nfunction estimateCost(count, techToday, prices = {}) {\n  const dns = prices.dnsPerCheck ?? 0.002;\n  const tech = prices.techPerCheck ?? 0.003;\n  const start = prices.start ?? 0.00005;\n  const run = count * dns + start + (techToday ? count * tech + start : 0);\n  const month = (count * dns * 30) + (count * tech * 4.35) + 2 * start * 30;\n  return { perRunUsd: round(run, 4), perMonthUsd: round(month, 2) };\n}\n\n// 1 = Monday ... 7 = Sunday (UTC)\nfunction weekdayUtc(now) { const d = new Date(now).getUTCDay(); return d === 0 ? 7 : d; }\n\nfunction planRun(settings, now = Date.now()) {\n  const parsed = parseClients(settings.clients, settings.maxDomains ?? 100);\n  const techToday = settings.useMockData === true ? true : settings.techCheckWeekday === 0 ? false : (settings.techCheckWeekday === 8 ? true : weekdayUtc(now) === (settings.techCheckWeekday || 1));\n  const cost = estimateCost(parsed.domains.length, techToday);\n  const plan = { problems: parsed.problems, domains: parsed.domains, techToday, cost, skip: false, reason: '' };\n  if (!parsed.domains.length) { plan.skip = true; plan.reason = 'No valid domains in Settings.clients. Nothing was run and nothing was charged.'; return plan; }\n  if (!settings.useMockData && settings.maxRunCostUsd > 0 && cost.perRunUsd > settings.maxRunCostUsd) {\n    plan.skip = true; plan.reason = `Estimated cost of this run ($${cost.perRunUsd}) is above maxRunCostUsd ($${settings.maxRunCostUsd}). Nothing was run and nothing was charged.`; return plan;\n  }\n  const names = parsed.domains.map((d) => d.domain);\n  plan.maxTotalChargeUsd = round(Math.max(0.01, cost.perRunUsd * 1.3), 3);\n  plan.dnsInput = { domains: names, watchlistName: settings.watchlistName, confirmRuns: settings.confirmRuns ?? 2, expiryWarningDays: [30, 14] };\n  plan.techInput = { domains: names, watchlistName: settings.watchlistName, confirmRuns: settings.confirmRuns ?? 2, minConfidence: 50 };\n  return plan;\n}\n\n// ---- classification -------------------------------------------------------------------------------------------------\n\nconst TECH_IMPORTANT = /pay|commerce|shop|analytic|tag manager|consent|cookie|checkout|security|captcha/i;\n\nfunction level(l, why) { return { level: l, why }; }\n\nfunction classifyDnsChange(r) {\n  const f = r.field;\n  if (r.change === 'expiring_soon') {\n    const d = r.daysToExpiry;\n    if (d <= 7) return level('critical', `expires in ${d} day(s)`);\n    if (d <= 14) return level('high', `expires in ${d} days`);\n    return level('medium', `expires in ${d} days`);\n  }\n  if (f === 'nameservers' || f === 'rdapNameservers') return level('critical', 'nameservers changed: the DNS provider may have moved (or the domain was hijacked)');\n  if (f === 'registrar') return level('critical', 'registrar changed: the domain was transferred');\n  if (f === 'domainStatus') return level('high', 'registry status flags changed (a lock may have been removed or a hold added)');\n  if (f === 'mx') return level('high', 'mail routing (MX) changed: check mail still arrives');\n  if (f === 'dmarc' || f === 'spf') {\n    if (r.after == null || (Array.isArray(r.after) && !r.after.length)) return level('high', `${f.toUpperCase()} record was removed: mail from this domain is easier to spoof and may land in spam`);\n    return level('medium', `${f.toUpperCase()} record was edited`);\n  }\n  if (f === 'expiresAt') return level('low', 'expiry date changed (usually a renewal)');\n  return level('medium', `${f || 'record'} changed`);\n}\n\nfunction classifyTechChange(r) {\n  const important = TECH_IMPORTANT.test(`${r.category || ''} ${r.technology || ''}`);\n  if (r.change === 'removed') return important ? level('high', `${r.technology} disappeared (${r.category || 'tool'}): the client site may have lost something it relied on`) : level('medium', `${r.technology} was removed`);\n  return level('low', `${r.technology} was added`);\n}\n\nfunction listText(v) { return Array.isArray(v) ? (v.length ? v.join(', ') : 'none') : (v == null ? 'none' : String(v)); }\nfunction short(s, n = 140) { s = String(s); return s.length > n ? `${s.slice(0, n - 1)}…` : s; }\nfunction dayKey(now) { return new Date(now).toISOString().slice(0, 10); }\n\nfunction classify({ dnsRows = [], techRows = [], techRan = false, clients = [], state = [], settings = {}, now = Date.now() }) {\n  const clientOf = new Map(clients.map((c) => [c.domain, c.client]));\n  const cooldownMs = (settings.cooldownDays ?? 30) * DAY;\n  const known = new Map();\n  for (const s of state) if (s.kind === 'alert') known.set(s.key, Math.max(known.get(s.key) ?? 0, Date.parse(s.at) || 0));\n  const alerts = [];\n  const notes = [];\n  const add = (a) => {\n    const lastAt = known.get(a.key);\n    if (lastAt && now - lastAt < (a.cooldownMs ?? cooldownMs)) { notes.push({ key: a.key, suppressed: 'already alerted' }); return; }\n    if (alerts.some((x) => x.key === a.key)) return;\n    alerts.push({ client: clientOf.get(a.domain) || 'Unassigned', ...a });\n  };\n  const dailyDays = settings.dailyReminderDays ?? 7;\n  const failN = settings.failStreakAlert ?? 3;\n  const today = dayKey(now);\n\n  const dnsDomainRows = dnsRows.filter((r) => r.type === 'domain');\n  const dnsChanges = dnsRows.filter((r) => r.type === 'change');\n  const hasDailyReminder = new Set();\n\n  // expiry reminders: every day while <= dailyDays (escalating), including already expired\n  for (const r of dnsDomainRows) {\n    if (r.status !== 'ok' || r.exists === false || typeof r.daysToExpiry !== 'number') continue;\n    if (r.daysToExpiry <= dailyDays) {\n      hasDailyReminder.add(r.domain);\n      const exp = r.current?.expiresAt || '';\n      const msg = r.daysToExpiry < 0 ? `expired ${-r.daysToExpiry} day(s) ago` : `expires in ${r.daysToExpiry} day(s)`;\n      add({ key: `exp-daily|${r.domain}|${exp}|${today}`, domain: r.domain, source: 'dns', level: r.daysToExpiry <= 7 ? 'critical' : 'high', title: 'Domain expiry', detail: `${msg}${exp ? ` (${exp})` : ''}. Reminders repeat daily until it is renewed.`, cooldownMs: DAY });\n    }\n  }\n  for (const r of dnsChanges) {\n    if (r.change === 'expiring_soon' && hasDailyReminder.has(r.domain)) continue;\n    const c = classifyDnsChange(r);\n    const when = r.confirmedAt || r.firstObservedAt || '';\n    const key = r.change === 'expiring_soon'\n      ? `exp-threshold|${r.domain}|${r.after}|${r.threshold}`\n      : `dns|${r.domain}|${r.change}|${r.field}|${short(JSON.stringify(r.after), 80)}|${when}`;\n    const detail = r.change === 'expiring_soon' ? `Domain ${c.why} (${r.after}).` : `${c.why}. Before: ${short(listText(r.before))}. Now: ${short(listText(r.after))}.`;\n    add({ key, domain: r.domain, source: 'dns', level: c.level, title: r.change === 'expiring_soon' ? 'Domain expiry' : `DNS/registration: ${r.field}`, detail, cooldownMs: 365 * DAY });\n  }\n  for (const r of dnsDomainRows) {\n    if (r.exists === false) add({ key: `nxdomain|${r.domain}|${today}`, domain: r.domain, source: 'dns', level: 'critical', title: 'Domain does not exist', detail: 'The domain returns \"does not exist\" (NXDOMAIN). It may have lapsed or been deleted, or it is mistyped in your list.', cooldownMs: DAY });\n  }\n  const techDomainRows = techRows.filter((r) => r.type === 'domain');\n  for (const r of techRows.filter((x) => x.type === 'change')) {\n    const c = classifyTechChange(r);\n    add({ key: `tech|${r.domain}|${r.change}|${r.technology}|${r.confirmedAt || ''}`, domain: r.domain, source: 'tech', level: c.level, title: `Technology ${r.change}`, detail: `${c.why}.${r.category ? ` Category: ${r.category}.` : ''}`, cooldownMs: 365 * DAY });\n  }\n\n  // failures: a failed check is \"unknown\", never a change. Alert only after failN runs in a row.\n  const stateRows = state.filter((s) => s.kind === 'fail' || s.kind === 'ok');\n  const streakOf = (domain, scope) => {\n    const rows = stateRows.filter((s) => s.domain === domain && s.scope === scope).sort((a, b) => Date.parse(a.at) - Date.parse(b.at));\n    let n = 0;\n    for (const s of rows) n = s.kind === 'fail' ? n + 1 : 0;\n    return n;\n  };\n  const failed = [];\n  const okNow = [];\n  const check = (rows, scope, isFail, isOk) => {\n    for (const r of rows) {\n      if (isFail(r)) {\n        const streak = streakOf(r.domain, scope) + 1;\n        failed.push({ domain: r.domain, scope, streak, reason: r.errorType || (r.errors && r.errors[0]) || r.scanStatus || r.status });\n        if (streak >= failN && streak % failN === 0) add({ key: `fail|${r.domain}|${scope}|${streak}`, domain: r.domain, source: scope, level: 'low', title: `Could not check (${scope})`, detail: `${streak} checks in a row failed. This is NOT a change: the last known state is unchanged. Possible causes: the site blocks automated checks or is down.`, cooldownMs: 365 * DAY });\n      } else if (isOk(r)) okNow.push({ domain: r.domain, scope, reset: streakOf(r.domain, scope) > 0 });\n    }\n  };\n  check(dnsDomainRows, 'dns', (r) => r.status === 'failed' && r.exists !== false, (r) => r.status === 'ok');\n  if (techRan) {\n    check(techDomainRows.filter((r) => r.scanStatus !== 'skipped_robots'), 'tech', (r) => r.scanStatus === 'error' || r.scanStatus === 'blocked', (r) => r.scanStatus === 'ok');\n    for (const r of techDomainRows.filter((x) => x.scanStatus === 'skipped_robots')) add({ key: `robots|${r.domain}`, domain: r.domain, source: 'tech', level: 'low', title: 'Technology check skipped', detail: 'This site\\'s robots.txt disallows automated checks, so technology changes are not monitored for it (DNS and expiry still are).', cooldownMs: 90 * DAY });\n  }\n\n  // monitoring health: no rows at all means the Actor run itself failed, which must not look like \"all quiet\"\n  const expected = clients.length;\n  const dnsHealthy = dnsDomainRows.length > 0;\n  if (expected && !dnsHealthy) add({ key: `health|dns|${today}`, domain: '(all)', source: 'dns', level: 'high', title: 'Monitoring did not run', detail: 'The DNS Actor returned no data (run failed, spending cap reached or Apify credential problem). Nothing was checked today: this is NOT an all-clear.', cooldownMs: DAY });\n  if (techRan && expected && !techDomainRows.length) add({ key: `health|tech|${today}`, domain: '(all)', source: 'tech', level: 'medium', title: 'Technology monitoring did not run', detail: 'The Tech Stack Change Monitor returned no data. DNS and expiry checks above are unaffected.', cooldownMs: DAY });\n\n  alerts.sort((a, b) => LEVEL_RANK[a.level] - LEVEL_RANK[b.level] || a.client.localeCompare(b.client) || a.domain.localeCompare(b.domain));\n  const baselineCount = dnsDomainRows.filter((r) => r.baseline).length;\n  return { alerts, failed, okNow, notes, summary: { clients: new Set(clients.map((c) => c.client)).size, domains: expected, dnsChecked: dnsDomainRows.filter((r) => r.status === 'ok').length, techChecked: techRan ? techDomainRows.filter((r) => r.scanStatus === 'ok').length : null, baselineCount, alerts: alerts.length, bySeverity: Object.fromEntries(LEVELS.map((l) => [l, alerts.filter((a) => a.level === l).length])) } };\n}\n\n// ---- digest ----------------------------------------------------------------------------------------------------------\n\nconst ICON = { critical: '🔴', high: '🟠', medium: '🟡', low: '⚪' };\nconst esc = (s) => String(s).replace(/[&<>\"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[c]));\n\nfunction buildDigest(result, settings = {}, plan = {}) {\n  const { alerts, summary } = result;\n  const minLevel = LEVEL_RANK[settings.minLevel] ?? 3;\n  const shown = alerts.filter((a) => LEVEL_RANK[a.level] <= minLevel);\n  const maxLines = settings.maxLinesInDigest ?? 40;\n  const baselineOnly = !shown.length && summary.baselineCount > 0;\n  const send = shown.length > 0;\n  const top = shown[0]?.level;\n  const subject = send ? `[${top.toUpperCase()}] ${shown.length} client domain alert${shown.length > 1 ? 's' : ''}${settings.useMockData ? ' (TEST DATA)' : ''}` : '';\n  const lines = [];\n  const clientsSeen = [...new Set(shown.map((a) => a.client))];\n  for (const c of clientsSeen) {\n    lines.push(`*${c}*`);\n    for (const a of shown.filter((x) => x.client === c).slice(0, maxLines)) lines.push(`${ICON[a.level]} ${a.level.toUpperCase()} · ${a.domain} · ${a.title}: ${a.detail}`);\n  }\n  const foot = `Checked ${summary.domains} domain(s) for ${summary.clients} client(s)${summary.techChecked != null ? `; technology check ran today (${summary.techChecked} ok)` : '; technology check runs on its own weekday'}. Estimated Apify cost of this run: $${plan.cost?.perRunUsd ?? '?'}.`;\n  const text = send ? `${subject}\\n\\n${lines.join('\\n')}\\n\\n${foot}` : '';\n  const html = send ? `<h3>${esc(subject)}</h3>${clientsSeen.map((c) => `<h4>${esc(c)}</h4><ul>${shown.filter((x) => x.client === c).map((a) => `<li>${ICON[a.level]} <b>${a.level.toUpperCase()}</b> · ${esc(a.domain)} · ${esc(a.title)}: ${esc(a.detail)}</li>`).join('')}</ul>`).join('')}<p><small>${esc(foot)}</small></p>` : '';\n  return { send, subject, text, html, count: shown.length, hiddenByMinLevel: alerts.length - shown.length, baselineOnly, quietNote: send ? '' : (baselineOnly ? `Baseline saved for ${summary.baselineCount} domain(s). No alerts on a first run.` : 'All quiet: nothing changed, nothing to send.'), summary };\n}\n\n// rows to append to the state data table after a successful notification\nfunction planWrites(result, digestSent, now = Date.now()) {\n  const at = new Date(now).toISOString();\n  const rows = [];\n  for (const a of result.alerts) rows.push({ kind: 'alert', key: a.key, domain: a.domain, scope: a.source, level: a.level, at, note: short(a.title, 60) });\n  const failedSet = new Set(result.failed.map((f) => `${f.domain}|${f.scope}`));\n  for (const f of result.failed) rows.push({ kind: 'fail', key: '', domain: f.domain, scope: f.scope, level: '', at, note: short(String(f.reason ?? ''), 60) });\n  for (const o of result.okNow) if (!failedSet.has(`${o.domain}|${o.scope}`) && o.reset) rows.push({ kind: 'ok', key: '', domain: o.domain, scope: o.scope, level: '', at, note: 'recovered' });\n  return rows;\n}\n\n// ---- test data (fictional .example domains; used only while useMockData is true) ---------------------------------------\n\nfunction mockActorRows(domains, now, scope) {\n  const iso = (ms) => new Date(ms).toISOString();\n  const day = (n) => iso(now + n * DAY).slice(0, 10);\n  const base = (domain) => ({ type: 'domain', domain, checkedAt: iso(now), status: 'ok', exists: true, baseline: false, changes: 0, errors: [], unknownFields: [], current: { expiresAt: day(400) }, daysToExpiry: 400 });\n  const rows = [];\n  for (const { domain } of domains) {\n    if (scope === 'dns') {\n      const r = base(domain);\n      if (domain === 'northwind-dental.example') {\n        r.daysToExpiry = 5; r.current.expiresAt = day(5);\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'nameservers', before: ['ns1.old-host.example'], after: ['ns1.new-host.example', 'ns2.new-host.example'], confirmedAt: iso(now - 3600000), confirmations: 2 });\n      }\n      if (domain === 'blue-harbor-cafe.example') {\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'dmarc', before: 'v=DMARC1; p=quarantine', after: null, confirmedAt: iso(now - 7200000), confirmations: 2 });\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'spf', before: 'v=spf1 include:_spf.mail-a.example ~all', after: 'v=spf1 include:_spf.mail-b.example ~all', confirmedAt: iso(now - 7200000), confirmations: 2 });\n      }\n      if (domain === 'harbor-events.example') { r.status = 'failed'; r.errors = ['dns_timeout']; r.current = {}; r.daysToExpiry = null; }\n      if (domain === 'old-mill-studio.example') { r.exists = false; r.current = {}; r.daysToExpiry = null; }\n      if (domain === 'green-leaf-florist.example') {\n        r.daysToExpiry = 14; r.current.expiresAt = day(14);\n        rows.push({ type: 'change', domain, change: 'expiring_soon', after: day(14), daysToExpiry: 14, threshold: 14 });\n      }\n      rows.push(r);\n    } else {\n      const r = { type: 'domain', domain, scanStatus: 'ok', errorType: null, baseline: false, changes: 0, technologies: [], pending: [], lastSuccessfulCheckAt: iso(now) };\n      if (domain === 'shop.acme-bakery.example') rows.push({ type: 'change', domain, change: 'removed', technology: 'Stripe', category: 'Payments', lastSeenAt: iso(now - 8 * DAY), firstMissingAt: iso(now - 7 * DAY), confirmedAt: iso(now - 3600000), confirmations: 2 });\n      if (domain === 'green-leaf-florist.example') rows.push({ type: 'change', domain, change: 'added', technology: 'Klaviyo', category: 'Email marketing', confidence: 90, confirmedAt: iso(now - 3600000), confirmations: 2 });\n      if (domain === 'harbor-events.example') { r.scanStatus = 'blocked'; r.errorType = 'http_403'; }\n      rows.push(r);\n    }\n  }\n  return rows;\n}\n\nconst plan = $('Plan run').first().json;\nreturn mockActorRows(plan.domains, Date.now(), 'tech').map((json) => ({ json }));"
+      },
+      "id": "csw-014-b22bb672",
+      "name": "Mock technology output (test data, free)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1900,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "apifyApi",
+        "resource": "Actors",
+        "operation": "Run actor and get dataset",
+        "actorSource": "store",
+        "actorId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "pRJT6ZiLLUe0I1YeG"
+        },
+        "actorInputMode": "json",
+        "customBody": "={{ JSON.stringify($('Plan run').first().json.techInput) }}",
+        "timeout": 1800,
+        "memory": 256,
+        "maxTotalChargeUsd": "={{ $('Plan run').first().json.maxTotalChargeUsd }}",
+        "build": ""
+      },
+      "id": "csw-015-9364976e",
+      "name": "Run Tech Stack Change Monitor",
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 2,
+      "position": [
+        1900,
+        340
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "notes": "asunoki/tech-stack-change-monitor ($0.003 per successful domain check). Select your Apify API credential. Runs only on techCheckWeekday."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pure logic for the \"client site watchdog\" workflow. build.mjs inlines this file into the Code nodes.\n// No network, no credentials. Everything is unit-tested in test/logic.test.js.\n\nconst DAY = 86400000;\nconst LEVELS = ['critical', 'high', 'medium', 'low'];\nconst LEVEL_RANK = { critical: 0, high: 1, medium: 2, low: 3 };\nconst DOMAIN_RE = /^(?=.{4,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/;\n\nfunction normalizeDomain(raw) {\n  let s = String(raw ?? '').trim().toLowerCase();\n  s = s.replace(/^[a-z][a-z0-9+.-]*:\\/\\//, '').replace(/[/?#].*$/, '').replace(/:\\d+$/, '').replace(/\\.$/, '').replace(/^www\\./, '');\n  return DOMAIN_RE.test(s) ? s : null;\n}\n\n// \"Client name | domain\" per line (the client name is optional). Lines starting with # are comments.\nfunction parseClients(text, maxDomains = 100) {\n  const domains = [];\n  const problems = [];\n  const seen = new Set();\n  let truncated = 0;\n  String(text ?? '').split(/\\r?\\n/).forEach((line, i) => {\n    const t = line.trim();\n    if (!t || t.startsWith('#')) return;\n    const parts = t.split('|').map((x) => x.trim());\n    const rawDomain = parts.length > 1 ? parts[parts.length - 1] : parts[0];\n    const client = parts.length > 1 ? parts.slice(0, -1).join(' | ') || 'Unassigned' : 'Unassigned';\n    const domain = normalizeDomain(rawDomain);\n    if (!domain) { problems.push(`line ${i + 1}: \"${t.slice(0, 60)}\" is not a valid domain name`); return; }\n    if (seen.has(domain)) { problems.push(`line ${i + 1}: ${domain} is listed twice (kept the first)`); return; }\n    seen.add(domain);\n    if (domains.length >= maxDomains) { truncated += 1; return; }\n    domains.push({ client, domain });\n  });\n  if (truncated) problems.push(`${truncated} domain(s) over maxDomains (${maxDomains}) were left out`);\n  return { domains, problems };\n}\n\nfunction round(x, n = 2) { const f = 10 ** n; return Math.round(x * f) / f; }\n\nfunction estimateCost(count, techToday, prices = {}) {\n  const dns = prices.dnsPerCheck ?? 0.002;\n  const tech = prices.techPerCheck ?? 0.003;\n  const start = prices.start ?? 0.00005;\n  const run = count * dns + start + (techToday ? count * tech + start : 0);\n  const month = (count * dns * 30) + (count * tech * 4.35) + 2 * start * 30;\n  return { perRunUsd: round(run, 4), perMonthUsd: round(month, 2) };\n}\n\n// 1 = Monday ... 7 = Sunday (UTC)\nfunction weekdayUtc(now) { const d = new Date(now).getUTCDay(); return d === 0 ? 7 : d; }\n\nfunction planRun(settings, now = Date.now()) {\n  const parsed = parseClients(settings.clients, settings.maxDomains ?? 100);\n  const techToday = settings.useMockData === true ? true : settings.techCheckWeekday === 0 ? false : (settings.techCheckWeekday === 8 ? true : weekdayUtc(now) === (settings.techCheckWeekday || 1));\n  const cost = estimateCost(parsed.domains.length, techToday);\n  const plan = { problems: parsed.problems, domains: parsed.domains, techToday, cost, skip: false, reason: '' };\n  if (!parsed.domains.length) { plan.skip = true; plan.reason = 'No valid domains in Settings.clients. Nothing was run and nothing was charged.'; return plan; }\n  if (!settings.useMockData && settings.maxRunCostUsd > 0 && cost.perRunUsd > settings.maxRunCostUsd) {\n    plan.skip = true; plan.reason = `Estimated cost of this run ($${cost.perRunUsd}) is above maxRunCostUsd ($${settings.maxRunCostUsd}). Nothing was run and nothing was charged.`; return plan;\n  }\n  const names = parsed.domains.map((d) => d.domain);\n  plan.maxTotalChargeUsd = round(Math.max(0.01, cost.perRunUsd * 1.3), 3);\n  plan.dnsInput = { domains: names, watchlistName: settings.watchlistName, confirmRuns: settings.confirmRuns ?? 2, expiryWarningDays: [30, 14] };\n  plan.techInput = { domains: names, watchlistName: settings.watchlistName, confirmRuns: settings.confirmRuns ?? 2, minConfidence: 50 };\n  return plan;\n}\n\n// ---- classification -------------------------------------------------------------------------------------------------\n\nconst TECH_IMPORTANT = /pay|commerce|shop|analytic|tag manager|consent|cookie|checkout|security|captcha/i;\n\nfunction level(l, why) { return { level: l, why }; }\n\nfunction classifyDnsChange(r) {\n  const f = r.field;\n  if (r.change === 'expiring_soon') {\n    const d = r.daysToExpiry;\n    if (d <= 7) return level('critical', `expires in ${d} day(s)`);\n    if (d <= 14) return level('high', `expires in ${d} days`);\n    return level('medium', `expires in ${d} days`);\n  }\n  if (f === 'nameservers' || f === 'rdapNameservers') return level('critical', 'nameservers changed: the DNS provider may have moved (or the domain was hijacked)');\n  if (f === 'registrar') return level('critical', 'registrar changed: the domain was transferred');\n  if (f === 'domainStatus') return level('high', 'registry status flags changed (a lock may have been removed or a hold added)');\n  if (f === 'mx') return level('high', 'mail routing (MX) changed: check mail still arrives');\n  if (f === 'dmarc' || f === 'spf') {\n    if (r.after == null || (Array.isArray(r.after) && !r.after.length)) return level('high', `${f.toUpperCase()} record was removed: mail from this domain is easier to spoof and may land in spam`);\n    return level('medium', `${f.toUpperCase()} record was edited`);\n  }\n  if (f === 'expiresAt') return level('low', 'expiry date changed (usually a renewal)');\n  return level('medium', `${f || 'record'} changed`);\n}\n\nfunction classifyTechChange(r) {\n  const important = TECH_IMPORTANT.test(`${r.category || ''} ${r.technology || ''}`);\n  if (r.change === 'removed') return important ? level('high', `${r.technology} disappeared (${r.category || 'tool'}): the client site may have lost something it relied on`) : level('medium', `${r.technology} was removed`);\n  return level('low', `${r.technology} was added`);\n}\n\nfunction listText(v) { return Array.isArray(v) ? (v.length ? v.join(', ') : 'none') : (v == null ? 'none' : String(v)); }\nfunction short(s, n = 140) { s = String(s); return s.length > n ? `${s.slice(0, n - 1)}…` : s; }\nfunction dayKey(now) { return new Date(now).toISOString().slice(0, 10); }\n\nfunction classify({ dnsRows = [], techRows = [], techRan = false, clients = [], state = [], settings = {}, now = Date.now() }) {\n  const clientOf = new Map(clients.map((c) => [c.domain, c.client]));\n  const cooldownMs = (settings.cooldownDays ?? 30) * DAY;\n  const known = new Map();\n  for (const s of state) if (s.kind === 'alert') known.set(s.key, Math.max(known.get(s.key) ?? 0, Date.parse(s.at) || 0));\n  const alerts = [];\n  const notes = [];\n  const add = (a) => {\n    const lastAt = known.get(a.key);\n    if (lastAt && now - lastAt < (a.cooldownMs ?? cooldownMs)) { notes.push({ key: a.key, suppressed: 'already alerted' }); return; }\n    if (alerts.some((x) => x.key === a.key)) return;\n    alerts.push({ client: clientOf.get(a.domain) || 'Unassigned', ...a });\n  };\n  const dailyDays = settings.dailyReminderDays ?? 7;\n  const failN = settings.failStreakAlert ?? 3;\n  const today = dayKey(now);\n\n  const dnsDomainRows = dnsRows.filter((r) => r.type === 'domain');\n  const dnsChanges = dnsRows.filter((r) => r.type === 'change');\n  const hasDailyReminder = new Set();\n\n  // expiry reminders: every day while <= dailyDays (escalating), including already expired\n  for (const r of dnsDomainRows) {\n    if (r.status !== 'ok' || r.exists === false || typeof r.daysToExpiry !== 'number') continue;\n    if (r.daysToExpiry <= dailyDays) {\n      hasDailyReminder.add(r.domain);\n      const exp = r.current?.expiresAt || '';\n      const msg = r.daysToExpiry < 0 ? `expired ${-r.daysToExpiry} day(s) ago` : `expires in ${r.daysToExpiry} day(s)`;\n      add({ key: `exp-daily|${r.domain}|${exp}|${today}`, domain: r.domain, source: 'dns', level: r.daysToExpiry <= 7 ? 'critical' : 'high', title: 'Domain expiry', detail: `${msg}${exp ? ` (${exp})` : ''}. Reminders repeat daily until it is renewed.`, cooldownMs: DAY });\n    }\n  }\n  for (const r of dnsChanges) {\n    if (r.change === 'expiring_soon' && hasDailyReminder.has(r.domain)) continue;\n    const c = classifyDnsChange(r);\n    const when = r.confirmedAt || r.firstObservedAt || '';\n    const key = r.change === 'expiring_soon'\n      ? `exp-threshold|${r.domain}|${r.after}|${r.threshold}`\n      : `dns|${r.domain}|${r.change}|${r.field}|${short(JSON.stringify(r.after), 80)}|${when}`;\n    const detail = r.change === 'expiring_soon' ? `Domain ${c.why} (${r.after}).` : `${c.why}. Before: ${short(listText(r.before))}. Now: ${short(listText(r.after))}.`;\n    add({ key, domain: r.domain, source: 'dns', level: c.level, title: r.change === 'expiring_soon' ? 'Domain expiry' : `DNS/registration: ${r.field}`, detail, cooldownMs: 365 * DAY });\n  }\n  for (const r of dnsDomainRows) {\n    if (r.exists === false) add({ key: `nxdomain|${r.domain}|${today}`, domain: r.domain, source: 'dns', level: 'critical', title: 'Domain does not exist', detail: 'The domain returns \"does not exist\" (NXDOMAIN). It may have lapsed or been deleted, or it is mistyped in your list.', cooldownMs: DAY });\n  }\n  const techDomainRows = techRows.filter((r) => r.type === 'domain');\n  for (const r of techRows.filter((x) => x.type === 'change')) {\n    const c = classifyTechChange(r);\n    add({ key: `tech|${r.domain}|${r.change}|${r.technology}|${r.confirmedAt || ''}`, domain: r.domain, source: 'tech', level: c.level, title: `Technology ${r.change}`, detail: `${c.why}.${r.category ? ` Category: ${r.category}.` : ''}`, cooldownMs: 365 * DAY });\n  }\n\n  // failures: a failed check is \"unknown\", never a change. Alert only after failN runs in a row.\n  const stateRows = state.filter((s) => s.kind === 'fail' || s.kind === 'ok');\n  const streakOf = (domain, scope) => {\n    const rows = stateRows.filter((s) => s.domain === domain && s.scope === scope).sort((a, b) => Date.parse(a.at) - Date.parse(b.at));\n    let n = 0;\n    for (const s of rows) n = s.kind === 'fail' ? n + 1 : 0;\n    return n;\n  };\n  const failed = [];\n  const okNow = [];\n  const check = (rows, scope, isFail, isOk) => {\n    for (const r of rows) {\n      if (isFail(r)) {\n        const streak = streakOf(r.domain, scope) + 1;\n        failed.push({ domain: r.domain, scope, streak, reason: r.errorType || (r.errors && r.errors[0]) || r.scanStatus || r.status });\n        if (streak >= failN && streak % failN === 0) add({ key: `fail|${r.domain}|${scope}|${streak}`, domain: r.domain, source: scope, level: 'low', title: `Could not check (${scope})`, detail: `${streak} checks in a row failed. This is NOT a change: the last known state is unchanged. Possible causes: the site blocks automated checks or is down.`, cooldownMs: 365 * DAY });\n      } else if (isOk(r)) okNow.push({ domain: r.domain, scope, reset: streakOf(r.domain, scope) > 0 });\n    }\n  };\n  check(dnsDomainRows, 'dns', (r) => r.status === 'failed' && r.exists !== false, (r) => r.status === 'ok');\n  if (techRan) {\n    check(techDomainRows.filter((r) => r.scanStatus !== 'skipped_robots'), 'tech', (r) => r.scanStatus === 'error' || r.scanStatus === 'blocked', (r) => r.scanStatus === 'ok');\n    for (const r of techDomainRows.filter((x) => x.scanStatus === 'skipped_robots')) add({ key: `robots|${r.domain}`, domain: r.domain, source: 'tech', level: 'low', title: 'Technology check skipped', detail: 'This site\\'s robots.txt disallows automated checks, so technology changes are not monitored for it (DNS and expiry still are).', cooldownMs: 90 * DAY });\n  }\n\n  // monitoring health: no rows at all means the Actor run itself failed, which must not look like \"all quiet\"\n  const expected = clients.length;\n  const dnsHealthy = dnsDomainRows.length > 0;\n  if (expected && !dnsHealthy) add({ key: `health|dns|${today}`, domain: '(all)', source: 'dns', level: 'high', title: 'Monitoring did not run', detail: 'The DNS Actor returned no data (run failed, spending cap reached or Apify credential problem). Nothing was checked today: this is NOT an all-clear.', cooldownMs: DAY });\n  if (techRan && expected && !techDomainRows.length) add({ key: `health|tech|${today}`, domain: '(all)', source: 'tech', level: 'medium', title: 'Technology monitoring did not run', detail: 'The Tech Stack Change Monitor returned no data. DNS and expiry checks above are unaffected.', cooldownMs: DAY });\n\n  alerts.sort((a, b) => LEVEL_RANK[a.level] - LEVEL_RANK[b.level] || a.client.localeCompare(b.client) || a.domain.localeCompare(b.domain));\n  const baselineCount = dnsDomainRows.filter((r) => r.baseline).length;\n  return { alerts, failed, okNow, notes, summary: { clients: new Set(clients.map((c) => c.client)).size, domains: expected, dnsChecked: dnsDomainRows.filter((r) => r.status === 'ok').length, techChecked: techRan ? techDomainRows.filter((r) => r.scanStatus === 'ok').length : null, baselineCount, alerts: alerts.length, bySeverity: Object.fromEntries(LEVELS.map((l) => [l, alerts.filter((a) => a.level === l).length])) } };\n}\n\n// ---- digest ----------------------------------------------------------------------------------------------------------\n\nconst ICON = { critical: '🔴', high: '🟠', medium: '🟡', low: '⚪' };\nconst esc = (s) => String(s).replace(/[&<>\"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[c]));\n\nfunction buildDigest(result, settings = {}, plan = {}) {\n  const { alerts, summary } = result;\n  const minLevel = LEVEL_RANK[settings.minLevel] ?? 3;\n  const shown = alerts.filter((a) => LEVEL_RANK[a.level] <= minLevel);\n  const maxLines = settings.maxLinesInDigest ?? 40;\n  const baselineOnly = !shown.length && summary.baselineCount > 0;\n  const send = shown.length > 0;\n  const top = shown[0]?.level;\n  const subject = send ? `[${top.toUpperCase()}] ${shown.length} client domain alert${shown.length > 1 ? 's' : ''}${settings.useMockData ? ' (TEST DATA)' : ''}` : '';\n  const lines = [];\n  const clientsSeen = [...new Set(shown.map((a) => a.client))];\n  for (const c of clientsSeen) {\n    lines.push(`*${c}*`);\n    for (const a of shown.filter((x) => x.client === c).slice(0, maxLines)) lines.push(`${ICON[a.level]} ${a.level.toUpperCase()} · ${a.domain} · ${a.title}: ${a.detail}`);\n  }\n  const foot = `Checked ${summary.domains} domain(s) for ${summary.clients} client(s)${summary.techChecked != null ? `; technology check ran today (${summary.techChecked} ok)` : '; technology check runs on its own weekday'}. Estimated Apify cost of this run: $${plan.cost?.perRunUsd ?? '?'}.`;\n  const text = send ? `${subject}\\n\\n${lines.join('\\n')}\\n\\n${foot}` : '';\n  const html = send ? `<h3>${esc(subject)}</h3>${clientsSeen.map((c) => `<h4>${esc(c)}</h4><ul>${shown.filter((x) => x.client === c).map((a) => `<li>${ICON[a.level]} <b>${a.level.toUpperCase()}</b> · ${esc(a.domain)} · ${esc(a.title)}: ${esc(a.detail)}</li>`).join('')}</ul>`).join('')}<p><small>${esc(foot)}</small></p>` : '';\n  return { send, subject, text, html, count: shown.length, hiddenByMinLevel: alerts.length - shown.length, baselineOnly, quietNote: send ? '' : (baselineOnly ? `Baseline saved for ${summary.baselineCount} domain(s). No alerts on a first run.` : 'All quiet: nothing changed, nothing to send.'), summary };\n}\n\n// rows to append to the state data table after a successful notification\nfunction planWrites(result, digestSent, now = Date.now()) {\n  const at = new Date(now).toISOString();\n  const rows = [];\n  for (const a of result.alerts) rows.push({ kind: 'alert', key: a.key, domain: a.domain, scope: a.source, level: a.level, at, note: short(a.title, 60) });\n  const failedSet = new Set(result.failed.map((f) => `${f.domain}|${f.scope}`));\n  for (const f of result.failed) rows.push({ kind: 'fail', key: '', domain: f.domain, scope: f.scope, level: '', at, note: short(String(f.reason ?? ''), 60) });\n  for (const o of result.okNow) if (!failedSet.has(`${o.domain}|${o.scope}`) && o.reset) rows.push({ kind: 'ok', key: '', domain: o.domain, scope: o.scope, level: '', at, note: 'recovered' });\n  return rows;\n}\n\n// ---- test data (fictional .example domains; used only while useMockData is true) ---------------------------------------\n\nfunction mockActorRows(domains, now, scope) {\n  const iso = (ms) => new Date(ms).toISOString();\n  const day = (n) => iso(now + n * DAY).slice(0, 10);\n  const base = (domain) => ({ type: 'domain', domain, checkedAt: iso(now), status: 'ok', exists: true, baseline: false, changes: 0, errors: [], unknownFields: [], current: { expiresAt: day(400) }, daysToExpiry: 400 });\n  const rows = [];\n  for (const { domain } of domains) {\n    if (scope === 'dns') {\n      const r = base(domain);\n      if (domain === 'northwind-dental.example') {\n        r.daysToExpiry = 5; r.current.expiresAt = day(5);\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'nameservers', before: ['ns1.old-host.example'], after: ['ns1.new-host.example', 'ns2.new-host.example'], confirmedAt: iso(now - 3600000), confirmations: 2 });\n      }\n      if (domain === 'blue-harbor-cafe.example') {\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'dmarc', before: 'v=DMARC1; p=quarantine', after: null, confirmedAt: iso(now - 7200000), confirmations: 2 });\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'spf', before: 'v=spf1 include:_spf.mail-a.example ~all', after: 'v=spf1 include:_spf.mail-b.example ~all', confirmedAt: iso(now - 7200000), confirmations: 2 });\n      }\n      if (domain === 'harbor-events.example') { r.status = 'failed'; r.errors = ['dns_timeout']; r.current = {}; r.daysToExpiry = null; }\n      if (domain === 'old-mill-studio.example') { r.exists = false; r.current = {}; r.daysToExpiry = null; }\n      if (domain === 'green-leaf-florist.example') {\n        r.daysToExpiry = 14; r.current.expiresAt = day(14);\n        rows.push({ type: 'change', domain, change: 'expiring_soon', after: day(14), daysToExpiry: 14, threshold: 14 });\n      }\n      rows.push(r);\n    } else {\n      const r = { type: 'domain', domain, scanStatus: 'ok', errorType: null, baseline: false, changes: 0, technologies: [], pending: [], lastSuccessfulCheckAt: iso(now) };\n      if (domain === 'shop.acme-bakery.example') rows.push({ type: 'change', domain, change: 'removed', technology: 'Stripe', category: 'Payments', lastSeenAt: iso(now - 8 * DAY), firstMissingAt: iso(now - 7 * DAY), confirmedAt: iso(now - 3600000), confirmations: 2 });\n      if (domain === 'green-leaf-florist.example') rows.push({ type: 'change', domain, change: 'added', technology: 'Klaviyo', category: 'Email marketing', confidence: 90, confirmedAt: iso(now - 3600000), confirmations: 2 });\n      if (domain === 'harbor-events.example') { r.scanStatus = 'blocked'; r.errorType = 'http_403'; }\n      rows.push(r);\n    }\n  }\n  return rows;\n}\n\nconst get = (name) => { try { return $(name).all().map((i) => i.json).filter((r) => r && r.type); } catch (e) { return []; } };\nconst settings = $('Settings').first().json;\nconst plan = $('Plan run').first().json;\nconst mock = settings.useMockData === true;\nlet state = [];\ntry { state = $('Get state rows').all().map((i) => i.json).filter((r) => r && r.kind); } catch (e) { state = []; }\nconst dnsRows = get(mock ? 'Mock DNS output (test data, free)' : 'Run DNS & RDAP Change Feed');\nconst techRows = plan.techToday ? get(mock ? 'Mock technology output (test data, free)' : 'Run Tech Stack Change Monitor') : [];\nconst result = classify({ dnsRows, techRows, techRan: plan.techToday === true, clients: plan.domains, state, settings, now: Date.now() });\nconst digest = buildDigest(result, settings, plan);\nreturn [{ json: { digest, alerts: result.alerts, failedChecks: result.failed, suppressedAsDuplicates: result.notes.length, listProblems: plan.problems, result } }];"
+      },
+      "id": "csw-016-116c89b1",
+      "name": "Classify and deduplicate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2140,
+        440
+      ],
+      "notes": "Urgency levels, daily expiry reminders, failure streaks, duplicate suppression and the digest text (digest.text for Slack, digest.html for e-mail). Edit the level rules here if your policy differs."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "csw-if-11023272",
+              "leftValue": "={{ $json.digest.send }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "csw-017-11023272",
+      "name": "Anything to send?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2380,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "csw-if-cdbef598",
+              "leftValue": "={{ $('Settings').first().json.useMockData !== true && ($('Settings').first().json.slackEnabled === true || $('Settings').first().json.emailEnabled === true) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "csw-018-3ac2d204",
+      "name": "Live mode? (not test data, a channel is on)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2620,
+        340
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "csw-019-c2a16a97",
+      "name": "Preview only (nothing sent, nothing saved)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2620,
+        160
+      ],
+      "notes": "Test data or both channels off: read digest.text in the previous node. Nothing is sent and the alert state is not saved, so enabling a channel later still alerts."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "csw-if-70106d90",
+              "leftValue": "={{ $('Settings').first().json.slackEnabled }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "csw-020-70106d90",
+      "name": "Slack enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2860,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Settings').first().json.slackChannel.replace(/^#/, '') }}"
+        },
+        "messageType": "text",
+        "text": "={{ $('Classify and deduplicate').first().json.digest.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "csw-021-4c62bd89",
+      "name": "Send to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        3100,
+        240
+      ],
+      "notes": "Select your Slack credential. If sending fails the run stops with an error and nothing is saved, so the next run alerts again."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "csw-if-2802e60d",
+              "leftValue": "={{ $('Settings').first().json.emailEnabled }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "csw-022-2802e60d",
+      "name": "Email enabled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3340,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "html": "={{ $('Classify and deduplicate').first().json.digest.html }}",
+        "options": {},
+        "subject": "={{ $('Classify and deduplicate').first().json.digest.subject }}",
+        "toEmail": "={{ $('Settings').first().json.emailTo }}",
+        "fromEmail": "={{ $('Settings').first().json.emailFrom }}",
+        "emailFormat": "html"
+      },
+      "id": "csw-023-619a901e",
+      "name": "Send email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        3580,
+        340
+      ],
+      "notes": "Select your SMTP credential (any provider). If sending fails the run stops and nothing is saved."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pure logic for the \"client site watchdog\" workflow. build.mjs inlines this file into the Code nodes.\n// No network, no credentials. Everything is unit-tested in test/logic.test.js.\n\nconst DAY = 86400000;\nconst LEVELS = ['critical', 'high', 'medium', 'low'];\nconst LEVEL_RANK = { critical: 0, high: 1, medium: 2, low: 3 };\nconst DOMAIN_RE = /^(?=.{4,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/;\n\nfunction normalizeDomain(raw) {\n  let s = String(raw ?? '').trim().toLowerCase();\n  s = s.replace(/^[a-z][a-z0-9+.-]*:\\/\\//, '').replace(/[/?#].*$/, '').replace(/:\\d+$/, '').replace(/\\.$/, '').replace(/^www\\./, '');\n  return DOMAIN_RE.test(s) ? s : null;\n}\n\n// \"Client name | domain\" per line (the client name is optional). Lines starting with # are comments.\nfunction parseClients(text, maxDomains = 100) {\n  const domains = [];\n  const problems = [];\n  const seen = new Set();\n  let truncated = 0;\n  String(text ?? '').split(/\\r?\\n/).forEach((line, i) => {\n    const t = line.trim();\n    if (!t || t.startsWith('#')) return;\n    const parts = t.split('|').map((x) => x.trim());\n    const rawDomain = parts.length > 1 ? parts[parts.length - 1] : parts[0];\n    const client = parts.length > 1 ? parts.slice(0, -1).join(' | ') || 'Unassigned' : 'Unassigned';\n    const domain = normalizeDomain(rawDomain);\n    if (!domain) { problems.push(`line ${i + 1}: \"${t.slice(0, 60)}\" is not a valid domain name`); return; }\n    if (seen.has(domain)) { problems.push(`line ${i + 1}: ${domain} is listed twice (kept the first)`); return; }\n    seen.add(domain);\n    if (domains.length >= maxDomains) { truncated += 1; return; }\n    domains.push({ client, domain });\n  });\n  if (truncated) problems.push(`${truncated} domain(s) over maxDomains (${maxDomains}) were left out`);\n  return { domains, problems };\n}\n\nfunction round(x, n = 2) { const f = 10 ** n; return Math.round(x * f) / f; }\n\nfunction estimateCost(count, techToday, prices = {}) {\n  const dns = prices.dnsPerCheck ?? 0.002;\n  const tech = prices.techPerCheck ?? 0.003;\n  const start = prices.start ?? 0.00005;\n  const run = count * dns + start + (techToday ? count * tech + start : 0);\n  const month = (count * dns * 30) + (count * tech * 4.35) + 2 * start * 30;\n  return { perRunUsd: round(run, 4), perMonthUsd: round(month, 2) };\n}\n\n// 1 = Monday ... 7 = Sunday (UTC)\nfunction weekdayUtc(now) { const d = new Date(now).getUTCDay(); return d === 0 ? 7 : d; }\n\nfunction planRun(settings, now = Date.now()) {\n  const parsed = parseClients(settings.clients, settings.maxDomains ?? 100);\n  const techToday = settings.useMockData === true ? true : settings.techCheckWeekday === 0 ? false : (settings.techCheckWeekday === 8 ? true : weekdayUtc(now) === (settings.techCheckWeekday || 1));\n  const cost = estimateCost(parsed.domains.length, techToday);\n  const plan = { problems: parsed.problems, domains: parsed.domains, techToday, cost, skip: false, reason: '' };\n  if (!parsed.domains.length) { plan.skip = true; plan.reason = 'No valid domains in Settings.clients. Nothing was run and nothing was charged.'; return plan; }\n  if (!settings.useMockData && settings.maxRunCostUsd > 0 && cost.perRunUsd > settings.maxRunCostUsd) {\n    plan.skip = true; plan.reason = `Estimated cost of this run ($${cost.perRunUsd}) is above maxRunCostUsd ($${settings.maxRunCostUsd}). Nothing was run and nothing was charged.`; return plan;\n  }\n  const names = parsed.domains.map((d) => d.domain);\n  plan.maxTotalChargeUsd = round(Math.max(0.01, cost.perRunUsd * 1.3), 3);\n  plan.dnsInput = { domains: names, watchlistName: settings.watchlistName, confirmRuns: settings.confirmRuns ?? 2, expiryWarningDays: [30, 14] };\n  plan.techInput = { domains: names, watchlistName: settings.watchlistName, confirmRuns: settings.confirmRuns ?? 2, minConfidence: 50 };\n  return plan;\n}\n\n// ---- classification -------------------------------------------------------------------------------------------------\n\nconst TECH_IMPORTANT = /pay|commerce|shop|analytic|tag manager|consent|cookie|checkout|security|captcha/i;\n\nfunction level(l, why) { return { level: l, why }; }\n\nfunction classifyDnsChange(r) {\n  const f = r.field;\n  if (r.change === 'expiring_soon') {\n    const d = r.daysToExpiry;\n    if (d <= 7) return level('critical', `expires in ${d} day(s)`);\n    if (d <= 14) return level('high', `expires in ${d} days`);\n    return level('medium', `expires in ${d} days`);\n  }\n  if (f === 'nameservers' || f === 'rdapNameservers') return level('critical', 'nameservers changed: the DNS provider may have moved (or the domain was hijacked)');\n  if (f === 'registrar') return level('critical', 'registrar changed: the domain was transferred');\n  if (f === 'domainStatus') return level('high', 'registry status flags changed (a lock may have been removed or a hold added)');\n  if (f === 'mx') return level('high', 'mail routing (MX) changed: check mail still arrives');\n  if (f === 'dmarc' || f === 'spf') {\n    if (r.after == null || (Array.isArray(r.after) && !r.after.length)) return level('high', `${f.toUpperCase()} record was removed: mail from this domain is easier to spoof and may land in spam`);\n    return level('medium', `${f.toUpperCase()} record was edited`);\n  }\n  if (f === 'expiresAt') return level('low', 'expiry date changed (usually a renewal)');\n  return level('medium', `${f || 'record'} changed`);\n}\n\nfunction classifyTechChange(r) {\n  const important = TECH_IMPORTANT.test(`${r.category || ''} ${r.technology || ''}`);\n  if (r.change === 'removed') return important ? level('high', `${r.technology} disappeared (${r.category || 'tool'}): the client site may have lost something it relied on`) : level('medium', `${r.technology} was removed`);\n  return level('low', `${r.technology} was added`);\n}\n\nfunction listText(v) { return Array.isArray(v) ? (v.length ? v.join(', ') : 'none') : (v == null ? 'none' : String(v)); }\nfunction short(s, n = 140) { s = String(s); return s.length > n ? `${s.slice(0, n - 1)}…` : s; }\nfunction dayKey(now) { return new Date(now).toISOString().slice(0, 10); }\n\nfunction classify({ dnsRows = [], techRows = [], techRan = false, clients = [], state = [], settings = {}, now = Date.now() }) {\n  const clientOf = new Map(clients.map((c) => [c.domain, c.client]));\n  const cooldownMs = (settings.cooldownDays ?? 30) * DAY;\n  const known = new Map();\n  for (const s of state) if (s.kind === 'alert') known.set(s.key, Math.max(known.get(s.key) ?? 0, Date.parse(s.at) || 0));\n  const alerts = [];\n  const notes = [];\n  const add = (a) => {\n    const lastAt = known.get(a.key);\n    if (lastAt && now - lastAt < (a.cooldownMs ?? cooldownMs)) { notes.push({ key: a.key, suppressed: 'already alerted' }); return; }\n    if (alerts.some((x) => x.key === a.key)) return;\n    alerts.push({ client: clientOf.get(a.domain) || 'Unassigned', ...a });\n  };\n  const dailyDays = settings.dailyReminderDays ?? 7;\n  const failN = settings.failStreakAlert ?? 3;\n  const today = dayKey(now);\n\n  const dnsDomainRows = dnsRows.filter((r) => r.type === 'domain');\n  const dnsChanges = dnsRows.filter((r) => r.type === 'change');\n  const hasDailyReminder = new Set();\n\n  // expiry reminders: every day while <= dailyDays (escalating), including already expired\n  for (const r of dnsDomainRows) {\n    if (r.status !== 'ok' || r.exists === false || typeof r.daysToExpiry !== 'number') continue;\n    if (r.daysToExpiry <= dailyDays) {\n      hasDailyReminder.add(r.domain);\n      const exp = r.current?.expiresAt || '';\n      const msg = r.daysToExpiry < 0 ? `expired ${-r.daysToExpiry} day(s) ago` : `expires in ${r.daysToExpiry} day(s)`;\n      add({ key: `exp-daily|${r.domain}|${exp}|${today}`, domain: r.domain, source: 'dns', level: r.daysToExpiry <= 7 ? 'critical' : 'high', title: 'Domain expiry', detail: `${msg}${exp ? ` (${exp})` : ''}. Reminders repeat daily until it is renewed.`, cooldownMs: DAY });\n    }\n  }\n  for (const r of dnsChanges) {\n    if (r.change === 'expiring_soon' && hasDailyReminder.has(r.domain)) continue;\n    const c = classifyDnsChange(r);\n    const when = r.confirmedAt || r.firstObservedAt || '';\n    const key = r.change === 'expiring_soon'\n      ? `exp-threshold|${r.domain}|${r.after}|${r.threshold}`\n      : `dns|${r.domain}|${r.change}|${r.field}|${short(JSON.stringify(r.after), 80)}|${when}`;\n    const detail = r.change === 'expiring_soon' ? `Domain ${c.why} (${r.after}).` : `${c.why}. Before: ${short(listText(r.before))}. Now: ${short(listText(r.after))}.`;\n    add({ key, domain: r.domain, source: 'dns', level: c.level, title: r.change === 'expiring_soon' ? 'Domain expiry' : `DNS/registration: ${r.field}`, detail, cooldownMs: 365 * DAY });\n  }\n  for (const r of dnsDomainRows) {\n    if (r.exists === false) add({ key: `nxdomain|${r.domain}|${today}`, domain: r.domain, source: 'dns', level: 'critical', title: 'Domain does not exist', detail: 'The domain returns \"does not exist\" (NXDOMAIN). It may have lapsed or been deleted, or it is mistyped in your list.', cooldownMs: DAY });\n  }\n  const techDomainRows = techRows.filter((r) => r.type === 'domain');\n  for (const r of techRows.filter((x) => x.type === 'change')) {\n    const c = classifyTechChange(r);\n    add({ key: `tech|${r.domain}|${r.change}|${r.technology}|${r.confirmedAt || ''}`, domain: r.domain, source: 'tech', level: c.level, title: `Technology ${r.change}`, detail: `${c.why}.${r.category ? ` Category: ${r.category}.` : ''}`, cooldownMs: 365 * DAY });\n  }\n\n  // failures: a failed check is \"unknown\", never a change. Alert only after failN runs in a row.\n  const stateRows = state.filter((s) => s.kind === 'fail' || s.kind === 'ok');\n  const streakOf = (domain, scope) => {\n    const rows = stateRows.filter((s) => s.domain === domain && s.scope === scope).sort((a, b) => Date.parse(a.at) - Date.parse(b.at));\n    let n = 0;\n    for (const s of rows) n = s.kind === 'fail' ? n + 1 : 0;\n    return n;\n  };\n  const failed = [];\n  const okNow = [];\n  const check = (rows, scope, isFail, isOk) => {\n    for (const r of rows) {\n      if (isFail(r)) {\n        const streak = streakOf(r.domain, scope) + 1;\n        failed.push({ domain: r.domain, scope, streak, reason: r.errorType || (r.errors && r.errors[0]) || r.scanStatus || r.status });\n        if (streak >= failN && streak % failN === 0) add({ key: `fail|${r.domain}|${scope}|${streak}`, domain: r.domain, source: scope, level: 'low', title: `Could not check (${scope})`, detail: `${streak} checks in a row failed. This is NOT a change: the last known state is unchanged. Possible causes: the site blocks automated checks or is down.`, cooldownMs: 365 * DAY });\n      } else if (isOk(r)) okNow.push({ domain: r.domain, scope, reset: streakOf(r.domain, scope) > 0 });\n    }\n  };\n  check(dnsDomainRows, 'dns', (r) => r.status === 'failed' && r.exists !== false, (r) => r.status === 'ok');\n  if (techRan) {\n    check(techDomainRows.filter((r) => r.scanStatus !== 'skipped_robots'), 'tech', (r) => r.scanStatus === 'error' || r.scanStatus === 'blocked', (r) => r.scanStatus === 'ok');\n    for (const r of techDomainRows.filter((x) => x.scanStatus === 'skipped_robots')) add({ key: `robots|${r.domain}`, domain: r.domain, source: 'tech', level: 'low', title: 'Technology check skipped', detail: 'This site\\'s robots.txt disallows automated checks, so technology changes are not monitored for it (DNS and expiry still are).', cooldownMs: 90 * DAY });\n  }\n\n  // monitoring health: no rows at all means the Actor run itself failed, which must not look like \"all quiet\"\n  const expected = clients.length;\n  const dnsHealthy = dnsDomainRows.length > 0;\n  if (expected && !dnsHealthy) add({ key: `health|dns|${today}`, domain: '(all)', source: 'dns', level: 'high', title: 'Monitoring did not run', detail: 'The DNS Actor returned no data (run failed, spending cap reached or Apify credential problem). Nothing was checked today: this is NOT an all-clear.', cooldownMs: DAY });\n  if (techRan && expected && !techDomainRows.length) add({ key: `health|tech|${today}`, domain: '(all)', source: 'tech', level: 'medium', title: 'Technology monitoring did not run', detail: 'The Tech Stack Change Monitor returned no data. DNS and expiry checks above are unaffected.', cooldownMs: DAY });\n\n  alerts.sort((a, b) => LEVEL_RANK[a.level] - LEVEL_RANK[b.level] || a.client.localeCompare(b.client) || a.domain.localeCompare(b.domain));\n  const baselineCount = dnsDomainRows.filter((r) => r.baseline).length;\n  return { alerts, failed, okNow, notes, summary: { clients: new Set(clients.map((c) => c.client)).size, domains: expected, dnsChecked: dnsDomainRows.filter((r) => r.status === 'ok').length, techChecked: techRan ? techDomainRows.filter((r) => r.scanStatus === 'ok').length : null, baselineCount, alerts: alerts.length, bySeverity: Object.fromEntries(LEVELS.map((l) => [l, alerts.filter((a) => a.level === l).length])) } };\n}\n\n// ---- digest ----------------------------------------------------------------------------------------------------------\n\nconst ICON = { critical: '🔴', high: '🟠', medium: '🟡', low: '⚪' };\nconst esc = (s) => String(s).replace(/[&<>\"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;' }[c]));\n\nfunction buildDigest(result, settings = {}, plan = {}) {\n  const { alerts, summary } = result;\n  const minLevel = LEVEL_RANK[settings.minLevel] ?? 3;\n  const shown = alerts.filter((a) => LEVEL_RANK[a.level] <= minLevel);\n  const maxLines = settings.maxLinesInDigest ?? 40;\n  const baselineOnly = !shown.length && summary.baselineCount > 0;\n  const send = shown.length > 0;\n  const top = shown[0]?.level;\n  const subject = send ? `[${top.toUpperCase()}] ${shown.length} client domain alert${shown.length > 1 ? 's' : ''}${settings.useMockData ? ' (TEST DATA)' : ''}` : '';\n  const lines = [];\n  const clientsSeen = [...new Set(shown.map((a) => a.client))];\n  for (const c of clientsSeen) {\n    lines.push(`*${c}*`);\n    for (const a of shown.filter((x) => x.client === c).slice(0, maxLines)) lines.push(`${ICON[a.level]} ${a.level.toUpperCase()} · ${a.domain} · ${a.title}: ${a.detail}`);\n  }\n  const foot = `Checked ${summary.domains} domain(s) for ${summary.clients} client(s)${summary.techChecked != null ? `; technology check ran today (${summary.techChecked} ok)` : '; technology check runs on its own weekday'}. Estimated Apify cost of this run: $${plan.cost?.perRunUsd ?? '?'}.`;\n  const text = send ? `${subject}\\n\\n${lines.join('\\n')}\\n\\n${foot}` : '';\n  const html = send ? `<h3>${esc(subject)}</h3>${clientsSeen.map((c) => `<h4>${esc(c)}</h4><ul>${shown.filter((x) => x.client === c).map((a) => `<li>${ICON[a.level]} <b>${a.level.toUpperCase()}</b> · ${esc(a.domain)} · ${esc(a.title)}: ${esc(a.detail)}</li>`).join('')}</ul>`).join('')}<p><small>${esc(foot)}</small></p>` : '';\n  return { send, subject, text, html, count: shown.length, hiddenByMinLevel: alerts.length - shown.length, baselineOnly, quietNote: send ? '' : (baselineOnly ? `Baseline saved for ${summary.baselineCount} domain(s). No alerts on a first run.` : 'All quiet: nothing changed, nothing to send.'), summary };\n}\n\n// rows to append to the state data table after a successful notification\nfunction planWrites(result, digestSent, now = Date.now()) {\n  const at = new Date(now).toISOString();\n  const rows = [];\n  for (const a of result.alerts) rows.push({ kind: 'alert', key: a.key, domain: a.domain, scope: a.source, level: a.level, at, note: short(a.title, 60) });\n  const failedSet = new Set(result.failed.map((f) => `${f.domain}|${f.scope}`));\n  for (const f of result.failed) rows.push({ kind: 'fail', key: '', domain: f.domain, scope: f.scope, level: '', at, note: short(String(f.reason ?? ''), 60) });\n  for (const o of result.okNow) if (!failedSet.has(`${o.domain}|${o.scope}`) && o.reset) rows.push({ kind: 'ok', key: '', domain: o.domain, scope: o.scope, level: '', at, note: 'recovered' });\n  return rows;\n}\n\n// ---- test data (fictional .example domains; used only while useMockData is true) ---------------------------------------\n\nfunction mockActorRows(domains, now, scope) {\n  const iso = (ms) => new Date(ms).toISOString();\n  const day = (n) => iso(now + n * DAY).slice(0, 10);\n  const base = (domain) => ({ type: 'domain', domain, checkedAt: iso(now), status: 'ok', exists: true, baseline: false, changes: 0, errors: [], unknownFields: [], current: { expiresAt: day(400) }, daysToExpiry: 400 });\n  const rows = [];\n  for (const { domain } of domains) {\n    if (scope === 'dns') {\n      const r = base(domain);\n      if (domain === 'northwind-dental.example') {\n        r.daysToExpiry = 5; r.current.expiresAt = day(5);\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'nameservers', before: ['ns1.old-host.example'], after: ['ns1.new-host.example', 'ns2.new-host.example'], confirmedAt: iso(now - 3600000), confirmations: 2 });\n      }\n      if (domain === 'blue-harbor-cafe.example') {\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'dmarc', before: 'v=DMARC1; p=quarantine', after: null, confirmedAt: iso(now - 7200000), confirmations: 2 });\n        rows.push({ type: 'change', domain, change: 'field_changed', field: 'spf', before: 'v=spf1 include:_spf.mail-a.example ~all', after: 'v=spf1 include:_spf.mail-b.example ~all', confirmedAt: iso(now - 7200000), confirmations: 2 });\n      }\n      if (domain === 'harbor-events.example') { r.status = 'failed'; r.errors = ['dns_timeout']; r.current = {}; r.daysToExpiry = null; }\n      if (domain === 'old-mill-studio.example') { r.exists = false; r.current = {}; r.daysToExpiry = null; }\n      if (domain === 'green-leaf-florist.example') {\n        r.daysToExpiry = 14; r.current.expiresAt = day(14);\n        rows.push({ type: 'change', domain, change: 'expiring_soon', after: day(14), daysToExpiry: 14, threshold: 14 });\n      }\n      rows.push(r);\n    } else {\n      const r = { type: 'domain', domain, scanStatus: 'ok', errorType: null, baseline: false, changes: 0, technologies: [], pending: [], lastSuccessfulCheckAt: iso(now) };\n      if (domain === 'shop.acme-bakery.example') rows.push({ type: 'change', domain, change: 'removed', technology: 'Stripe', category: 'Payments', lastSeenAt: iso(now - 8 * DAY), firstMissingAt: iso(now - 7 * DAY), confirmedAt: iso(now - 3600000), confirmations: 2 });\n      if (domain === 'green-leaf-florist.example') rows.push({ type: 'change', domain, change: 'added', technology: 'Klaviyo', category: 'Email marketing', confidence: 90, confirmedAt: iso(now - 3600000), confirmations: 2 });\n      if (domain === 'harbor-events.example') { r.scanStatus = 'blocked'; r.errorType = 'http_403'; }\n      rows.push(r);\n    }\n  }\n  return rows;\n}\n\nconst settings = $('Settings').first().json;\nconst live = settings.useMockData !== true && (settings.slackEnabled === true || settings.emailEnabled === true);\nif (!live) return [];\nconst d = $('Classify and deduplicate').first().json;\nreturn planWrites(d.result, d.digest.send, Date.now()).map((json) => ({ json }));"
+      },
+      "id": "csw-024-fc03e492",
+      "name": "Plan state writes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3820,
+        440
+      ],
+      "notes": "Only in live mode, and only after the notification went out (or when there was nothing to send): remembers sent alerts and failure streaks."
+    },
+    {
+      "parameters": {
+        "columns": {
+          "value": {
+            "kind": "={{ $json.kind }}",
+            "key": "={{ $json.key }}",
+            "domain": "={{ $json.domain }}",
+            "scope": "={{ $json.scope }}",
+            "level": "={{ $json.level }}",
+            "at": "={{ $json.at }}",
+            "note": "={{ $json.note }}"
+          },
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "kind",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "kind",
+              "defaultMatch": false
+            },
+            {
+              "id": "key",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "key",
+              "defaultMatch": false
+            },
+            {
+              "id": "domain",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "domain",
+              "defaultMatch": false
+            },
+            {
+              "id": "scope",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "scope",
+              "defaultMatch": false
+            },
+            {
+              "id": "level",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "level",
+              "defaultMatch": false
+            },
+            {
+              "id": "at",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "at",
+              "defaultMatch": false
+            },
+            {
+              "id": "note",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "note",
+              "defaultMatch": false
+            }
+          ]
+        },
+        "options": {},
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Ensure state table').first().json.id }}"
+        }
+      },
+      "id": "csw-025-c0c73bce",
+      "name": "Save state",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        4060,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Client site watchdog: DNS, domain expiry and technology changes\nFor agencies and freelancers who look after many client websites. Once a day it checks every client domain for **confirmed** changes to nameservers, mail records (MX, SPF, DMARC), registrar and domain status, warns before domains expire, and once a week checks for technology changes (a payment, analytics or consent tool that disappeared after a deploy). You get **one digest per run, only when something needs attention**, sorted by urgency (critical, high, medium, low) and grouped by client.\n\nWhat this adds on top of the two ASUNOKI Apify Actors it uses (*DNS & RDAP Change Feed*, *Tech Stack Change Monitor*; both already report a change only after it repeats on consecutive checks):\n- urgency levels, so a nameserver change is not buried under a new tag\n- daily expiry reminders from 7 days out (the Actors warn once per threshold), also after a domain has expired\n- a failed check is \"unknown\", never a change; a persistent failure is reported after 3 runs in a row\n- an empty or failed Actor run is reported as \"monitoring did not run\", never as all-clear\n- the same alert is never sent twice (a small data table remembers what you were told)\n- clean list handling: bad lines, duplicates and URLs are reported and skipped\n\n**Setup**\n1. Install the Apify community node (@apify/n8n-nodes-apify) and create an *Apify API* credential. Select it on both Apify nodes.\n2. Edit **Settings**: put your clients in *clients* (one \"Client | domain\" per line).\n3. Free test first: keep useMockData = true and click *Run now*. No Apify call, nothing is sent, nothing is saved. Read the output of *Classify and deduplicate* (digest.text).\n4. Set useMockData = false and run once: this saves the baseline (no alerts on the first run).\n5. Turn on slackEnabled and/or emailEnabled, select the credential on the send node, then enable the daily schedule.",
+        "height": 700,
+        "width": 900,
+        "color": 4
+      },
+      "id": "csw-026-0efc2e6b",
+      "name": "Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        -460
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Cost you pay to Apify (pay per event, no n8n cost)\n- DNS & RDAP Change Feed: **$0.002 per successful domain check**. Tech Stack Change Monitor: **$0.003 per successful domain check**. Failed, blocked and non-existent domains and all change rows are free. A tiny start fee ($0.00005) applies per run.\n- DNS runs daily, technology runs once a week (techCheckWeekday). **100 domains: about $6 + $1.30 = about $7.40 a month. 25 domains: about $1.85 a month.**\n- Safety: maxRunCostUsd stops the run before any Apify call if the estimate is above your limit, and each Apify run carries a spending cap (1.3 x the estimate).\n- Apify's free monthly credit may cover small lists. The estimate for your list is in *Plan run* (cost.perRunUsd, cost.perMonthUsd).",
+        "height": 330,
+        "width": 620,
+        "color": 6
+      },
+      "id": "csw-027-64ae43e8",
+      "name": "Cost",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -460
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### Limits (read before relying on it)\n- Changes are only as good as what is public: DNS over HTTPS, RDAP and the site's HTML. Some TLDs have no RDAP, so expiry is unknown for them (DNS changes still work). Technology detection can miss tools loaded only after interaction.\n- Urgency levels are rules of thumb (for example: nameserver or registrar change = critical, a removed payment/analytics/consent tool = high). Adjust them in the *Classify and deduplicate* code if your policy differs.\n- The first run only saves a baseline. A change is reported after it is seen twice (confirmRuns), so alerts arrive one run late by design.\n- State lives in the data table *client_watchdog_state* (append-only; delete old rows whenever you like). If a send node fails, nothing is saved and the next run alerts again.\n- Not tested on n8n Cloud. The data table nodes need an n8n version with data tables.",
+        "height": 450,
+        "width": 640,
+        "color": 3
+      },
+      "id": "csw-028-61a0ae3b",
+      "name": "Limits",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        -460
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Settings, state and plan\nEvery editable value is in **Settings**. A small data table remembers alerts you were already told about and failure streaks. *Plan run* validates the list and applies the budget guard before anything is spent.",
+        "height": 190,
+        "width": 1260,
+        "color": 7
+      },
+      "id": "csw-029-15c6ff2a",
+      "name": "Section: settings and state",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Run the Actors (or free test data)\nDNS & RDAP every run; technology changes only on techCheckWeekday. With useMockData = true nothing is called.",
+        "height": 160,
+        "width": 1160,
+        "color": 7
+      },
+      "id": "csw-030-e4d14e65",
+      "name": "Section: run Actors",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        980,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Classify, deduplicate, notify\nOne digest, only when something needs attention. Slack and/or e-mail. Nothing is sent in test or preview mode.",
+        "height": 160,
+        "width": 1400,
+        "color": 7
+      },
+      "id": "csw-031-ef503173",
+      "name": "Section: classify and notify",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2120,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Record\nSaved only after delivery, so a failed send is retried by the next run.",
+        "height": 140,
+        "width": 520,
+        "color": 7
+      },
+      "id": "csw-032-4ac89c15",
+      "name": "Section: record",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3780,
+        640
+      ]
+    }
+  ],
+  "connections": {
+    "Run now": {
+      "main": [
+        [
+          {
+            "node": "Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every day 07:00 (enable after a test run)": {
+      "main": [
+        [
+          {
+            "node": "Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Settings": {
+      "main": [
+        [
+          {
+            "node": "Ensure state table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ensure state table": {
+      "main": [
+        [
+          {
+            "node": "Get state rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get state rows": {
+      "main": [
+        [
+          {
+            "node": "Plan run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan run": {
+      "main": [
+        [
+          {
+            "node": "Anything to run?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything to run?": {
+      "main": [
+        [
+          {
+            "node": "Use mock data? (DNS)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nothing to run (see reason)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use mock data? (DNS)": {
+      "main": [
+        [
+          {
+            "node": "Mock DNS output (test data, free)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Run DNS & RDAP Change Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock DNS output (test data, free)": {
+      "main": [
+        [
+          {
+            "node": "Technology check today?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run DNS & RDAP Change Feed": {
+      "main": [
+        [
+          {
+            "node": "Technology check today?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Technology check today?": {
+      "main": [
+        [
+          {
+            "node": "Use mock data? (technology)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classify and deduplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use mock data? (technology)": {
+      "main": [
+        [
+          {
+            "node": "Mock technology output (test data, free)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Run Tech Stack Change Monitor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock technology output (test data, free)": {
+      "main": [
+        [
+          {
+            "node": "Classify and deduplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Tech Stack Change Monitor": {
+      "main": [
+        [
+          {
+            "node": "Classify and deduplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify and deduplicate": {
+      "main": [
+        [
+          {
+            "node": "Anything to send?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything to send?": {
+      "main": [
+        [
+          {
+            "node": "Live mode? (not test data, a channel is on)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Plan state writes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Live mode? (not test data, a channel is on)": {
+      "main": [
+        [
+          {
+            "node": "Slack enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preview only (nothing sent, nothing saved)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack enabled?": {
+      "main": [
+        [
+          {
+            "node": "Send to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Slack": {
+      "main": [
+        [
+          {
+            "node": "Email enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email enabled?": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Plan state writes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email": {
+      "main": [
+        [
+          {
+            "node": "Plan state writes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan state writes": {
+      "main": [
+        [
+          {
+            "node": "Save state",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
