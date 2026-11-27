@@ -39,5 +39,9 @@ technology change, failed and blocked checks (streak and recovery), robots.txt s
 result, duplicate prevention and re-run, invalid input, over-limit lists, budget guard, test mode saves nothing.
 `npm run check` verifies `workflow.json` is current and has no credentials, secrets, pinned data or active schedule.
 
-Not yet verified: a real run inside n8n (import, data-table nodes, Slack/e-mail delivery) and a real Actor run through
-the n8n Apify node. Tested logic and static checks only.
+Verified on n8n 2.48.6 (self-hosted, Docker): import, Data Table state, test data, first run, no change, DNS / expiry /
+technology changes, failed checks, empty Actor result, invalid input, re-run de-duplication, and "send failed, nothing
+saved, next run alerts again" (local SMTP sink, no real notification). The two Apify nodes were stubbed with fictional
+rows for those runs, so a real paid Actor run through the Apify node has not been exercised by the author; the node
+itself loads and reaches the credential check. Slack delivery was not exercised (same logic as the e-mail path).
+The Apify node comes from the community package `@apify/n8n-nodes-apify`; on self-hosted n8n install it first.

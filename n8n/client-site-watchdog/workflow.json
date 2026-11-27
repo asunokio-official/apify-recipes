@@ -368,6 +368,7 @@
         480
       ],
       "executeOnce": true,
+      "alwaysOutputData": true,
       "onError": "continueRegularOutput",
       "notes": "asunoki/dns-rdap-change-feed ($0.002 per successful domain check). Select your Apify API credential. If the run fails, the next step reports \"Monitoring did not run\" instead of an all-clear."
     },
@@ -479,6 +480,7 @@
         340
       ],
       "executeOnce": true,
+      "alwaysOutputData": true,
       "onError": "continueRegularOutput",
       "notes": "asunoki/tech-stack-change-monitor ($0.003 per successful domain check). Select your Apify API credential. Runs only on techCheckWeekday."
     },

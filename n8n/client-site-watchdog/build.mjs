@@ -135,7 +135,7 @@ export function buildWorkflow() {
       memory: 256,
       maxTotalChargeUsd: "={{ $('Plan run').first().json.maxTotalChargeUsd }}",
       build: '',
-    }, { executeOnce: true, onError: 'continueRegularOutput', notes: 'asunoki/dns-rdap-change-feed ($0.002 per successful domain check). Select your Apify API credential. If the run fails, the next step reports "Monitoring did not run" instead of an all-clear.' }),
+    }, { executeOnce: true, alwaysOutputData: true, onError: 'continueRegularOutput', notes: 'asunoki/dns-rdap-change-feed ($0.002 per successful domain check). Select your Apify API credential. If the run fails, the next step reports "Monitoring did not run" instead of an all-clear.' }),
     node('Technology check today?', 'n8n-nodes-base.if', 2.2, [1460, 360], ifTrue('Technology check today?', "={{ $('Plan run').first().json.techToday }}")),
     node('Use mock data? (technology)', 'n8n-nodes-base.if', 2.2, [1680, 240], ifTrue('Use mock data? (technology)', `={{ ${S}.useMockData }}`)),
     node('Mock technology output (test data, free)', 'n8n-nodes-base.code', 2, [1900, 140], {
@@ -153,7 +153,7 @@ export function buildWorkflow() {
       memory: 256,
       maxTotalChargeUsd: "={{ $('Plan run').first().json.maxTotalChargeUsd }}",
       build: '',
-    }, { executeOnce: true, onError: 'continueRegularOutput', notes: 'asunoki/tech-stack-change-monitor ($0.003 per successful domain check). Select your Apify API credential. Runs only on techCheckWeekday.' }),
+    }, { executeOnce: true, alwaysOutputData: true, onError: 'continueRegularOutput', notes: 'asunoki/tech-stack-change-monitor ($0.003 per successful domain check). Select your Apify API credential. Runs only on techCheckWeekday.' }),
     node('Classify and deduplicate', 'n8n-nodes-base.code', 2, [2140, 440], {
       jsCode: `${lib}\n\nconst get = (name) => { try { return $(name).all().map((i) => i.json).filter((r) => r && r.type); } catch (e) { return []; } };\nconst settings = $('Settings').first().json;\nconst plan = $('Plan run').first().json;\nconst mock = settings.useMockData === true;\nlet state = [];\ntry { state = $('Get state rows').all().map((i) => i.json).filter((r) => r && r.kind); } catch (e) { state = []; }\nconst dnsRows = get(mock ? 'Mock DNS output (test data, free)' : 'Run DNS & RDAP Change Feed');\nconst techRows = plan.techToday ? get(mock ? 'Mock technology output (test data, free)' : 'Run Tech Stack Change Monitor') : [];\nconst result = classify({ dnsRows, techRows, techRan: plan.techToday === true, clients: plan.domains, state, settings, now: Date.now() });\nconst digest = buildDigest(result, settings, plan);\nreturn [{ json: { digest, alerts: result.alerts, failedChecks: result.failed, suppressedAsDuplicates: result.notes.length, listProblems: plan.problems, result } }];`,
     }, { notes: 'Urgency levels, daily expiry reminders, failure streaks, duplicate suppression and the digest text (digest.text for Slack, digest.html for e-mail). Edit the level rules here if your policy differs.' }),

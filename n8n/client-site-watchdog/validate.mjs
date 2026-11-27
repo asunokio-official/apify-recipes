@@ -37,6 +37,7 @@ export function validateWorkflow(wf) {
   for (const a of apify) {
     if (!String(a.parameters.maxTotalChargeUsd).includes('maxTotalChargeUsd')) problems.push(`Apify node "${a.name}" must pass a spend cap`);
     if (a.executeOnce !== true) problems.push(`Apify node "${a.name}" must run once (otherwise it runs once per input item)`);
+    if (a.alwaysOutputData !== true) problems.push(`Apify node "${a.name}" needs alwaysOutputData (an empty Actor result must not silently stop the workflow)`);
   }
   const notes = wf.nodes.filter((n) => n.type === 'n8n-nodes-base.stickyNote');
   if (notes.length < 4) problems.push('needs an overview note and section notes');
